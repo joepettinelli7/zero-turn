@@ -1,0 +1,563 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		19C7A1732E9D8BED005E8436 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19C7A1512E9D8BEC005E8436 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 19C7A1582E9D8BEC005E8436;
+			remoteInfo = "zero-turn-game";
+		};
+		19C7A17D2E9D8BED005E8436 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19C7A1512E9D8BEC005E8436 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 19C7A1582E9D8BEC005E8436;
+			remoteInfo = "zero-turn-game";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		19C7A1592E9D8BEC005E8436 /* zero-turn-game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "zero-turn-game.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		19C7A1722E9D8BED005E8436 /* zero-turn-gameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "zero-turn-gameTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		19C7A17C2E9D8BED005E8436 /* zero-turn-gameUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "zero-turn-gameUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		19C7A15B2E9D8BEC005E8436 /* zero-turn-game */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "zero-turn-game";
+			sourceTree = "<group>";
+		};
+		19C7A1752E9D8BED005E8436 /* zero-turn-gameTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "zero-turn-gameTests";
+			sourceTree = "<group>";
+		};
+		19C7A17F2E9D8BED005E8436 /* zero-turn-gameUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "zero-turn-gameUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		19C7A1562E9D8BEC005E8436 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19C7A16F2E9D8BED005E8436 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19C7A1792E9D8BED005E8436 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		19C7A1502E9D8BEC005E8436 = {
+			isa = PBXGroup;
+			children = (
+				19C7A15B2E9D8BEC005E8436 /* zero-turn-game */,
+				19C7A1752E9D8BED005E8436 /* zero-turn-gameTests */,
+				19C7A17F2E9D8BED005E8436 /* zero-turn-gameUITests */,
+				19C7A15A2E9D8BEC005E8436 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		19C7A15A2E9D8BEC005E8436 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				19C7A1592E9D8BEC005E8436 /* zero-turn-game.app */,
+				19C7A1722E9D8BED005E8436 /* zero-turn-gameTests.xctest */,
+				19C7A17C2E9D8BED005E8436 /* zero-turn-gameUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		19C7A1582E9D8BEC005E8436 /* zero-turn-game */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 19C7A1862E9D8BED005E8436 /* Build configuration list for PBXNativeTarget "zero-turn-game" */;
+			buildPhases = (
+				19C7A1552E9D8BEC005E8436 /* Sources */,
+				19C7A1562E9D8BEC005E8436 /* Frameworks */,
+				19C7A1572E9D8BEC005E8436 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				19C7A15B2E9D8BEC005E8436 /* zero-turn-game */,
+			);
+			name = "zero-turn-game";
+			packageProductDependencies = (
+			);
+			productName = "zero-turn-game";
+			productReference = 19C7A1592E9D8BEC005E8436 /* zero-turn-game.app */;
+			productType = "com.apple.product-type.application";
+		};
+		19C7A1712E9D8BED005E8436 /* zero-turn-gameTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 19C7A1892E9D8BED005E8436 /* Build configuration list for PBXNativeTarget "zero-turn-gameTests" */;
+			buildPhases = (
+				19C7A16E2E9D8BED005E8436 /* Sources */,
+				19C7A16F2E9D8BED005E8436 /* Frameworks */,
+				19C7A1702E9D8BED005E8436 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				19C7A1742E9D8BED005E8436 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				19C7A1752E9D8BED005E8436 /* zero-turn-gameTests */,
+			);
+			name = "zero-turn-gameTests";
+			packageProductDependencies = (
+			);
+			productName = "zero-turn-gameTests";
+			productReference = 19C7A1722E9D8BED005E8436 /* zero-turn-gameTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		19C7A17B2E9D8BED005E8436 /* zero-turn-gameUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 19C7A18C2E9D8BED005E8436 /* Build configuration list for PBXNativeTarget "zero-turn-gameUITests" */;
+			buildPhases = (
+				19C7A1782E9D8BED005E8436 /* Sources */,
+				19C7A1792E9D8BED005E8436 /* Frameworks */,
+				19C7A17A2E9D8BED005E8436 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				19C7A17E2E9D8BED005E8436 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				19C7A17F2E9D8BED005E8436 /* zero-turn-gameUITests */,
+			);
+			name = "zero-turn-gameUITests";
+			packageProductDependencies = (
+			);
+			productName = "zero-turn-gameUITests";
+			productReference = 19C7A17C2E9D8BED005E8436 /* zero-turn-gameUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		19C7A1512E9D8BEC005E8436 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					19C7A1582E9D8BEC005E8436 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					19C7A1712E9D8BED005E8436 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 19C7A1582E9D8BEC005E8436;
+					};
+					19C7A17B2E9D8BED005E8436 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 19C7A1582E9D8BEC005E8436;
+					};
+				};
+			};
+			buildConfigurationList = 19C7A1542E9D8BEC005E8436 /* Build configuration list for PBXProject "zero-turn-game" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 19C7A1502E9D8BEC005E8436;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 19C7A15A2E9D8BEC005E8436 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				19C7A1582E9D8BEC005E8436 /* zero-turn-game */,
+				19C7A1712E9D8BED005E8436 /* zero-turn-gameTests */,
+				19C7A17B2E9D8BED005E8436 /* zero-turn-gameUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		19C7A1572E9D8BEC005E8436 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19C7A1702E9D8BED005E8436 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19C7A17A2E9D8BED005E8436 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		19C7A1552E9D8BEC005E8436 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19C7A16E2E9D8BED005E8436 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		19C7A1782E9D8BED005E8436 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		19C7A1742E9D8BED005E8436 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 19C7A1582E9D8BEC005E8436 /* zero-turn-game */;
+			targetProxy = 19C7A1732E9D8BED005E8436 /* PBXContainerItemProxy */;
+		};
+		19C7A17E2E9D8BED005E8436 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 19C7A1582E9D8BEC005E8436 /* zero-turn-game */;
+			targetProxy = 19C7A17D2E9D8BED005E8436 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		19C7A1842E9D8BED005E8436 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4VC28BAD84;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		19C7A1852E9D8BED005E8436 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4VC28BAD84;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		19C7A1872E9D8BED005E8436 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4VC28BAD84;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zero-turn-game.zero-turn-game";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		19C7A1882E9D8BED005E8436 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4VC28BAD84;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zero-turn-game.zero-turn-game";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		19C7A18A2E9D8BED005E8436 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4VC28BAD84;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zero-turn-game.zero-turn-gameTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/zero-turn-game.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/zero-turn-game";
+			};
+			name = Debug;
+		};
+		19C7A18B2E9D8BED005E8436 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4VC28BAD84;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zero-turn-game.zero-turn-gameTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/zero-turn-game.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/zero-turn-game";
+			};
+			name = Release;
+		};
+		19C7A18D2E9D8BED005E8436 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4VC28BAD84;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zero-turn-game.zero-turn-gameUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "zero-turn-game";
+			};
+			name = Debug;
+		};
+		19C7A18E2E9D8BED005E8436 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4VC28BAD84;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zero-turn-game.zero-turn-gameUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "zero-turn-game";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		19C7A1542E9D8BEC005E8436 /* Build configuration list for PBXProject "zero-turn-game" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				19C7A1842E9D8BED005E8436 /* Debug */,
+				19C7A1852E9D8BED005E8436 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		19C7A1862E9D8BED005E8436 /* Build configuration list for PBXNativeTarget "zero-turn-game" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				19C7A1872E9D8BED005E8436 /* Debug */,
+				19C7A1882E9D8BED005E8436 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		19C7A1892E9D8BED005E8436 /* Build configuration list for PBXNativeTarget "zero-turn-gameTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				19C7A18A2E9D8BED005E8436 /* Debug */,
+				19C7A18B2E9D8BED005E8436 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		19C7A18C2E9D8BED005E8436 /* Build configuration list for PBXNativeTarget "zero-turn-gameUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				19C7A18D2E9D8BED005E8436 /* Debug */,
+				19C7A18E2E9D8BED005E8436 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 19C7A1512E9D8BEC005E8436 /* Project object */;
+}
