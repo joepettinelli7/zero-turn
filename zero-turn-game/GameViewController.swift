@@ -4,10 +4,10 @@
 //
 //  Created by Joe Pettinelli on 10/13/25.
 //
-
 import UIKit
 import SpriteKit
 import GameplayKit
+
 
 class GameViewController: UIViewController {
 
@@ -42,11 +42,12 @@ class GameViewController: UIViewController {
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
-        } else {
-            return .all
-        }
+//        if UIDevice.current.userInterfaceIdiom == .phone {
+//            return .allButUpsideDown
+//        } else {
+//            return .all
+//        }
+        return .landscapeLeft
     }
 
     override var prefersStatusBarHidden: Bool {
