@@ -15,138 +15,81 @@ class GameScene: SKScene {
     
     private var lastUpdateTime : TimeInterval = 0
     private var mowerNode : MowerNode!
-    private var cameraNode : SKCameraNode!
     private var landscapeNode: LandscapeNode!
-    private var leftHandle : HandleSliderNode!
-    private var rightHandle : HandleSliderNode!
-    private var handleTouches = [UITouch: HandleSliderNode]()
+    var cameraNode : CameraNode!
+    var leftHandleValue: CGFloat = 0.0
+    var rightHandleValue: CGFloat = 0.0
     
-    override func sceneDidLoad() {
-        
-        self.lastUpdateTime = 0
-        
+    /// Add scene components when the scene first loads
+    override func sceneDidLoad() -> Void {
+        // Add mower to control
         mowerNode = MowerNode()
         mowerNode.node.position = CGPoint(x: frame.midX, y: frame.midY)
-        
-        // Add joystick to control movement
-        let joystickHeight = self.size.height * 0.1
-        leftHandle = HandleSliderNode(height: joystickHeight)
-        leftHandle.position = CGPoint(x: frame.minX + 70, y: frame.midY)
-        addChild(leftHandle)
-        rightHandle = HandleSliderNode(height: joystickHeight)
-        rightHandle.position = CGPoint(x: frame.maxX - 50, y: frame.midY)
-        addChild(rightHandle)
-        
-        landscapeNode = LandscapeNode()
+        addChild(mowerNode.node)
+        // Add landscape node which includes grass, trail marks, etc.
+        landscapeNode = LandscapeNode(grassImage: "grass3", dirtImage: "background")
         addChild(landscapeNode.node)
-        
-        cameraNode = SKCameraNode()
-        self.camera = cameraNode
-        cameraNode.position = mowerNode.node.position
-        addChild(cameraNode)
-        cameraNode.addChild(mowerNode.node)
-        mowerNode.node.position = .zero
+        // Add camera node
+        cameraNode = CameraNode()
+        cameraNode.node.position = landscapeNode.originalCenter
+        addChild(cameraNode.node)
+        self.camera = cameraNode.node
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
-        for t in touches {
-            let location = t.location(in: self)
-            
-            if leftHandle.contains(location) {
-                handleTouches[t] = leftHandle
-            } else if rightHandle.contains(location) {
-                handleTouches[t] = rightHandle
-            } else {
-                return
-            }
-        }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            if let handle = handleTouches[t] {
-                let location = t.location(in: handle)
-                handle.updateKnobPosition(touchY: location.y)
-            } else {
-                return
-            }
-        }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            if let handle = handleTouches[t] {
-                handle.reset()
-                handleTouches.removeValue(forKey: t)
-                
-            } else {
-                return
-            }
-        }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        touchesEnded(touches, with: event)
-    }
-    
+    /// Update the scene before it is rendered
+    ///
+    /// - Parameters:
+    ///     - currentTime: The time to set as last updated time
     override func update(_ currentTime: TimeInterval) -> Void {
-        // Called before each frame is rendered
-        
-        // Initialize lastUpdateTime
         if (self.lastUpdateTime == 0) {
             self.lastUpdateTime = currentTime
         }
-        
         // Calculate turnAmount and moveAmount
+        // Handle values in range -1.0 to 1.0
         let dt = currentTime - self.lastUpdateTime
-        let leftPower = leftHandle.value    // -1.0 to 1.0
-        let rightPower = rightHandle.value  // -1.0 to 1.0
+        let leftPower = leftHandleValue
+        let rightPower = rightHandleValue
         let turnAmount = (rightPower - leftPower) * dt
         let moveAmount = (rightPower + leftPower) * dt
-        
-        // Move landscape node position
-        let moveSpeed: CGFloat = 50.0
-        let angle: CGFloat = cameraNode.zRotation + (CGFloat.pi / 2)
-        let dxDir = -cos(angle)
-        let dx = dxDir * moveAmount * moveSpeed
-        let dyDir = -sin(angle)
-        let dy = dyDir * moveAmount * moveSpeed
-        landscapeNode.node.position.x += dx
-        landscapeNode.node.position.y += dy
-        
-        // Rotate landscape node in opposite direction of mower node
-        let rotation = -CGFloat(turnAmount)
-        let center = mowerNode.node.position
-        let currentPos = landscapeNode.node.position
-        // Apply affine transforms. Translate -> rotate -> translate back
-        var transform = CGAffineTransform(translationX: -center.x, y: -center.y)
-        var rotatedPos = currentPos.applying(transform)
-        transform = CGAffineTransform(rotationAngle: rotation)
-        rotatedPos = rotatedPos.applying(transform)
-        transform = CGAffineTransform(translationX: center.x, y: center.y)
-        rotatedPos = rotatedPos.applying(transform)
-        landscapeNode.node.position = rotatedPos
-        landscapeNode.node.zRotation += rotation
-        
-        // Leave trail mark on landscape node at position of mower node
-        let worldPos = convert(mowerNode.node.position, to: landscapeNode.node)
-        leaveTrailMark(at: worldPos)
-        
+        landscapeNode.moveAndRotate(
+            moveAmount: moveAmount,
+            turnAmount: turnAmount,
+            center: mowerNode.node.position,
+            cameraRotation: cameraNode.node.zRotation,
+            in: self
+        )
+        // Leave trail mark only if mower is moving
+        if moveAmount != 0.0 {
+            let worldPos = self.convert(mowerNode.node.position, to: landscapeNode.node)
+            landscapeNode.cutGrass(at: worldPos, radius: mowerNode.cutRadius)
+        }
+        // Position camera depending on CameraMode flag
+        if cameraNode.cameraMode == .centerOnMower {
+            centerCameraOnMower()
+        } else { centerCameraOnLandscape() }
         self.lastUpdateTime = currentTime
     }
     
-    func leaveTrailMark(at position: CGPoint) -> Void {
-        // Leave trail mark behind the mower
-        if let mower = mowerNode {
-            let radius = mower.node.frame.size.width / 4
-            let mark = SKShapeNode(circleOfRadius: radius)
-            mark.fillColor = .systemGreen
-            mark.strokeColor = .clear
-            mark.position = position
-            mark.zPosition = -1
-            landscapeNode.node.addChild(mark)
-        } else { return }
+    /// Center the camera on the center of landscape
+    func centerCameraOnLandscape() -> Void {
+        let centerInLandscape = landscapeNode.originalCenter
+        let centerInScene = landscapeNode.node.convert(centerInLandscape, to: self)
+        let moveAction = SKAction.move(to: centerInScene, duration: 0.2)
+        let zoomAction = SKAction.scale(to: 2.0, duration: 0.2)
+        moveAction.timingMode = .easeInEaseOut
+        zoomAction.timingMode = .easeInEaseOut
+        let actionGroup = SKAction.group([moveAction, zoomAction])
+        cameraNode.node.run(actionGroup)
     }
-
+    
+    /// Center the camera on the mower
+    func centerCameraOnMower() -> Void {
+        let targetPosition = mowerNode.node.position
+        let moveAction = SKAction.move(to: targetPosition, duration: 0.1)
+        let zoomAction = SKAction.scale(to: 0.80, duration: 0.1)
+        moveAction.timingMode = .easeInEaseOut
+        zoomAction.timingMode = .easeInEaseOut
+        let actionGroup = SKAction.group([moveAction, zoomAction])
+        cameraNode.node.run(actionGroup)
+    }
 }
