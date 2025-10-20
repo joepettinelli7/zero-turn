@@ -13,9 +13,11 @@ class LandscapeNode {
     let moveSpeed: CGFloat = 100.0
     let offsetRot: CGFloat = CGFloat.pi / 2  // 90 degrees counter-clockwise
     let originalCenter: CGPoint
+    var shouldFlattenTrail: Bool = false
     
     private let cropNode = SKCropNode()
-    private let maskNode = SKNode()
+    private let cropMaskNode = SKNode()
+    private let flattenedMaskNode = SKSpriteNode()
     private let grassTileMap: SKTileMapNode
     private let dirtTileMap: SKTileMapNode
     
@@ -25,10 +27,13 @@ class LandscapeNode {
         node.addChild(grassTileMap)
         let dirtTexture = SKTexture(imageNamed: dirtImage)
         dirtTileMap = Self.setupTileMap(texture: dirtTexture, nRows: 1, nCols: 1, zPos: 1.0)
-        cropNode.maskNode = maskNode
+        cropNode.maskNode = cropMaskNode
         cropNode.addChild(dirtTileMap)
         cropNode.zPosition = 1.0
         node.addChild(cropNode)
+        flattenedMaskNode.position = CGPoint(x: 0, y: 0)
+        flattenedMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        cropMaskNode.addChild(flattenedMaskNode)
         // Set originalCenter for camera node later
         let frame = node.calculateAccumulatedFrame()
         originalCenter = CGPoint(x: frame.midX, y: frame.midY)
@@ -77,7 +82,48 @@ class LandscapeNode {
         cut.fillColor = .white
         cut.strokeColor = .red
         cut.blendMode = .alpha
-        maskNode.addChild(cut)
+        cropMaskNode.addChild(cut)
+        if cropMaskNode.children.count == 100 {
+            shouldFlattenTrail = true
+        }
+    }
+    
+    /// Add all current shape nodes in trail  to a single texture-based mask.
+    /// This significantly increases performance and keeps FPS high.
+    ///
+    /// - Parameters:
+    ///     - view: The GameScene view
+    func flattenMask(using view: SKView) -> Void {
+        // Temp node holds previous flattened texture
+        let tempMaskNode = SKNode()
+        if let texture = flattenedMaskNode.texture {
+            let currentTextureNode = SKSpriteNode(texture: texture)
+            currentTextureNode.size = flattenedMaskNode.size
+            currentTextureNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            currentTextureNode.position = flattenedMaskNode.position
+            tempMaskNode.addChild(currentTextureNode)
+        }
+        // Add new cuts that are not in texture yet
+        for node in cropMaskNode.children where node != flattenedMaskNode {
+            if let shape = node as? SKShapeNode {
+                tempMaskNode.addChild(shape.copy() as! SKShapeNode)
+            }
+        }
+        // Calculate a fixed render area based on the crop mask node
+        let cropFrame = cropMaskNode.calculateAccumulatedFrame()
+        guard let maskTexture = view.texture(from: tempMaskNode, crop: cropFrame) else {
+            print("Failed to render cropMaskNode to texture")
+            return
+        }
+        // Apply to flattenedMaskNode
+        flattenedMaskNode.texture = maskTexture
+        flattenedMaskNode.size = cropFrame.size
+        flattenedMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        flattenedMaskNode.position = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
+        // Remove all new cut nodes and add texture with all as child
+        cropMaskNode.removeAllChildren()
+        cropMaskNode.addChild(flattenedMaskNode)
+        shouldFlattenTrail = false
     }
     
     /// Move and rotate the landscape node, so mower does not move

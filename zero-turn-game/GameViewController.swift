@@ -35,7 +35,7 @@ class GameViewController: UIViewController, JoystickDelegate {
                     view.presentScene(sceneNode)
                     view.ignoresSiblingOrder = true
                     view.showsFPS = true
-                    view.showsNodeCount = false
+                    view.showsNodeCount = true
                     self.gameScene = sceneNode
                 }
             }

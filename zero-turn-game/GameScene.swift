@@ -68,6 +68,9 @@ class GameScene: SKScene {
             centerCameraOnMower()
         } else { centerCameraOnLandscape() }
         self.lastUpdateTime = currentTime
+        if landscapeNode.shouldFlattenTrail {
+            landscapeNode.flattenMask(using: self.view!)
+        }
     }
     
     /// Center the camera on the center of landscape
