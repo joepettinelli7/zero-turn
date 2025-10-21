@@ -27,7 +27,7 @@ class GameScene: SKScene {
         mowerNode.node.position = CGPoint(x: frame.midX, y: frame.midY)
         addChild(mowerNode.node)
         // Add landscape node which includes grass, trail marks, etc.
-        landscapeNode = LandscapeNode(grassImage: "grass3", dirtImage: "background")
+        landscapeNode = LandscapeNode(grassImage: "grass_long", dirtImage: "grass_short")
         addChild(landscapeNode.node)
         // Add camera node
         cameraNode = CameraNode()
@@ -67,10 +67,13 @@ class GameScene: SKScene {
         if cameraNode.cameraMode == .centerOnMower {
             centerCameraOnMower()
         } else { centerCameraOnLandscape() }
-        self.lastUpdateTime = currentTime
+        // Flatten cut nodes into single texture
         if landscapeNode.shouldFlattenTrail {
             landscapeNode.flattenMask(using: self.view!)
         }
+        // Display uncut mask to user
+        landscapeNode.setDebugMaskVisible(cameraNode.cameraMode == .centerOnLandscape)
+        self.lastUpdateTime = currentTime
     }
     
     /// Center the camera on the center of landscape

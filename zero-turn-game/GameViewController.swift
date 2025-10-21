@@ -50,7 +50,7 @@ class GameViewController: UIViewController, JoystickDelegate {
     /// - Parameters:
     ///     - view: The GameViewController view
     private func addJoysticks(to view: UIView) -> Void {
-        let joystickSize = CGSize(width: 80, height: 180)
+        let joystickSize = CGSize(width: 80, height: 220)
         leftJoystick = createJoystick(size: joystickSize)
         rightJoystick = createJoystick(size: joystickSize)
         view.addSubview(leftJoystick)

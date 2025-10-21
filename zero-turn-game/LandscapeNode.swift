@@ -15,18 +15,19 @@ class LandscapeNode {
     let originalCenter: CGPoint
     var shouldFlattenTrail: Bool = false
     
-    private let cropNode = SKCropNode()
-    private let cropMaskNode = SKNode()
-    private let flattenedMaskNode = SKSpriteNode()
-    private let grassTileMap: SKTileMapNode
-    private let dirtTileMap: SKTileMapNode
+    private let cropNode = SKCropNode() // Crop the dirtTileMap until cut
+    private let cropMaskNode = SKNode() // Mask for cropNode
+    private let flattenedMaskNode = SKSpriteNode() // To create texture of all cut nodes
+    private let uncutMaskNode = SKSpriteNode() // Mask where grass is uncut
+    private let grassTileMap: SKTileMapNode // Uncut grass texture
+    private let dirtTileMap: SKTileMapNode // Cut grass texture
     
     init (grassImage: String, dirtImage: String) {
         let grassTexture = SKTexture(imageNamed: grassImage)
-        grassTileMap = Self.setupTileMap(texture: grassTexture, nRows: 9, nCols: 5, zPos: 0.0)
+        grassTileMap = Self.setupTileMap(texture: grassTexture, nRows: 2, nCols: 1, zPos: 0.0)
         node.addChild(grassTileMap)
         let dirtTexture = SKTexture(imageNamed: dirtImage)
-        dirtTileMap = Self.setupTileMap(texture: dirtTexture, nRows: 1, nCols: 1, zPos: 1.0)
+        dirtTileMap = Self.setupTileMap(texture: dirtTexture, nRows: 9, nCols: 5, zPos: 1.0)
         cropNode.maskNode = cropMaskNode
         cropNode.addChild(dirtTileMap)
         cropNode.zPosition = 1.0
@@ -34,6 +35,15 @@ class LandscapeNode {
         flattenedMaskNode.position = CGPoint(x: 0, y: 0)
         flattenedMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         cropMaskNode.addChild(flattenedMaskNode)
+        
+        uncutMaskNode.color = .red
+        uncutMaskNode.size = grassTileMap.mapSize
+        uncutMaskNode.position = CGPoint(x: 0, y: 0)
+        uncutMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        uncutMaskNode.alpha = 0.4
+        uncutMaskNode.zPosition = 1.0
+        cropNode.addChild(uncutMaskNode)
+        
         // Set originalCenter for camera node later
         let frame = node.calculateAccumulatedFrame()
         originalCenter = CGPoint(x: frame.midX, y: frame.midY)
@@ -80,7 +90,7 @@ class LandscapeNode {
         let cut = SKShapeNode(circleOfRadius: radius)
         cut.position = position
         cut.fillColor = .white
-        cut.strokeColor = .red
+        cut.strokeColor = .clear
         cut.blendMode = .alpha
         cropMaskNode.addChild(cut)
         if cropMaskNode.children.count == 100 {
@@ -152,5 +162,13 @@ class LandscapeNode {
         rotatedPos = rotatedPos.applying(transform)
         node.position = rotatedPos
         node.zRotation += rotation
+    }
+    
+    /// Toggle visibibility to highlight uncut regions
+    ///
+    /// - Parameters:
+    ///     - visible: Whether uncut mask should be visible
+    func setDebugMaskVisible(_ visible: Bool) -> Void {
+        uncutMaskNode.isHidden = !visible
     }
 }
