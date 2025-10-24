@@ -161,7 +161,7 @@ class LandscapeNode {
             prevPoints.append(point)
             node.addChild(obstacleNode)
             // Add cut buffer around obstacles
-            cutGrass(at: obstacleNode.position, radius: size.width * 0.75)
+            cutGrass(at: obstacleNode.position, width: size.width * 1.25, height: size.width * 1.25)
         }
     }
     
@@ -222,14 +222,18 @@ class LandscapeNode {
         return position
     }
     
-    /// Cut grass by changing mask node to show bottom grass node
+    /// Cut grass by changing mask node to show bottom grass node.
+    /// Create an ellipse shape because mower deck is ellipse shape.
     ///
     /// - Parameters:
     ///     - position: The position of where to cut grass
-    ///     - radius: The radius of circle to leave
-    func cutGrass(at position: CGPoint, radius: CGFloat) -> Void {
-        let cut = SKShapeNode(circleOfRadius: radius)
+    ///     - width: Width of rectangle
+    ///     - height: Height of rectangle
+    func cutGrass(at position: CGPoint, width: CGFloat, height: CGFloat) -> Void {
+        let ovalRect = CGRect(x: -width / 2, y: -height / 2, width: width, height: height)
+        let cut = SKShapeNode(ellipseIn: ovalRect)
         cut.position = position
+        cut.zRotation = -node.zRotation
         cut.fillColor = .white
         cut.strokeColor = .clear
         cut.blendMode = .alpha

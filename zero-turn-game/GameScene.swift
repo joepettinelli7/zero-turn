@@ -69,9 +69,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         )
         // Leave trail mark only if mower is moving
         if moveAmount != 0.0 {
-            let landscapePos = getBladePos()
-            landscapeNode.cutGrass(at: landscapePos, radius: mowerNode.cutRadius)
-        }
+            let bladeLandscapePos = getBladePos()
+            landscapeNode.cutGrass(at: bladeLandscapePos, width: mowerNode.cutWidth, height: mowerNode.cutHeight)
+            let avgPower = abs((leftPower + rightPower) / 2)
+            mowerNode.grassEmitter.particleBirthRate = 200 * avgPower
+            mowerNode.grassEmitter.particleSpeed = 500 * avgPower
+        } else { mowerNode.grassEmitter.particleBirthRate = 0 }
         // Position camera depending on CameraMode flag
         if cameraNode.cameraMode == .centerOnMower {
             centerCameraOnMower()
