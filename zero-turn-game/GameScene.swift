@@ -8,7 +8,14 @@ import SpriteKit
 import GameplayKit
 
 
-class GameScene: SKScene {
+struct PhysicsCategory {
+    static let none: UInt32 = 0
+    static let mower: UInt32 = 0b1
+    static let obstacle: UInt32 = 0b10
+}
+
+
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var entities = [GKEntity]()
     var graphs = [String : GKGraph]()
@@ -28,12 +35,14 @@ class GameScene: SKScene {
         addChild(mowerNode.node)
         // Add landscape node which includes grass, trail marks, etc.
         landscapeNode = LandscapeNode(grassImage: "grass_long", dirtImage: "grass_short")
+        landscapeNode.addObstacles(count: 2, mowerWidth: mowerNode.node.frame.width)
         addChild(landscapeNode.node)
         // Add camera node
         cameraNode = CameraNode()
         cameraNode.node.position = landscapeNode.originalCenter
         addChild(cameraNode.node)
         self.camera = cameraNode.node
+        physicsWorld.contactDelegate = self
     }
     
     /// Update the scene before it is rendered
@@ -60,20 +69,35 @@ class GameScene: SKScene {
         )
         // Leave trail mark only if mower is moving
         if moveAmount != 0.0 {
-            let worldPos = self.convert(mowerNode.node.position, to: landscapeNode.node)
-            landscapeNode.cutGrass(at: worldPos, radius: mowerNode.cutRadius)
+            let landscapePos = getBladePos()
+            landscapeNode.cutGrass(at: landscapePos, radius: mowerNode.cutRadius)
         }
         // Position camera depending on CameraMode flag
         if cameraNode.cameraMode == .centerOnMower {
             centerCameraOnMower()
         } else { centerCameraOnLandscape() }
         // Flatten cut nodes into single texture
-        if landscapeNode.shouldFlattenTrail {
+        let cutCount = landscapeNode.cutCount
+        if cutCount % 100 == 0 && cutCount != 0 {
             landscapeNode.flattenMask(using: self.view!)
         }
         // Display uncut mask to user
         landscapeNode.setDebugMaskVisible(cameraNode.cameraMode == .centerOnLandscape)
         self.lastUpdateTime = currentTime
+    }
+    
+    /// Get the offset position for the mower blade due to mower image not being symmetric
+    ///
+    /// - Returns:
+    ///     - The blade position in world coordinates
+    func getBladePos() -> CGPoint {
+        var landscapePos = self.convert(mowerNode.node.position, to: landscapeNode.node)
+        let angle = -landscapeNode.node.zRotation
+        let rotatedX = mowerNode.bladeOffset.x * cos(angle) - mowerNode.bladeOffset.y * sin(angle)
+        let rotatedY = mowerNode.bladeOffset.x * sin(angle) + mowerNode.bladeOffset.y * cos(angle)
+        landscapePos.x += rotatedX
+        landscapePos.y += rotatedY
+        return landscapePos
     }
     
     /// Center the camera on the center of landscape

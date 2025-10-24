@@ -5,6 +5,48 @@
 //  Created by Joe Pettinelli on 10/13/25.
 //
 import SpriteKit
+import GameplayKit
+
+
+extension CGPoint {
+    
+    /// Used for calculating  distance between points
+    ///
+    /// - Parameters:
+    ///     - point: The other point to get distance to
+    ///
+    /// - Returns:
+    ///     - The distance
+    func distance(to point: CGPoint) -> CGFloat {
+        let dx = x - point.x
+        let dy = y - point.y
+        return sqrt(dx*dx + dy*dy)
+    }
+}
+
+
+extension GKRandomSource {
+    
+    /// Returns a random CGFloat in the specified closed range.
+    ///
+    /// - Parameters:
+    ///     - range: The range for random number
+    ///
+    /// - Returns:
+    ///     - Random number
+    func nextCGFloat(in range: ClosedRange<CGFloat>) -> CGFloat {
+        let t = CGFloat(self.nextUniform()) // 0 - 1
+        return range.lowerBound + t * (range.upperBound - range.lowerBound)
+    }
+    
+    /// Returns a random angle in radians from 0 to 2pi
+    ///
+    /// - Returns:
+    ///     - Random angle in radians
+    func nextRotation() -> CGFloat {
+        return nextCGFloat(in: 0...CGFloat.pi * 2)
+    }
+}
 
 
 class LandscapeNode {
@@ -13,7 +55,6 @@ class LandscapeNode {
     let moveSpeed: CGFloat = 100.0
     let offsetRot: CGFloat = CGFloat.pi / 2  // 90 degrees counter-clockwise
     let originalCenter: CGPoint
-    var shouldFlattenTrail: Bool = false
     
     private let cropNode = SKCropNode() // Crop the dirtTileMap until cut
     private let cropMaskNode = SKNode() // Mask for cropNode
@@ -21,6 +62,12 @@ class LandscapeNode {
     private let uncutMaskNode = SKSpriteNode() // Mask where grass is uncut
     private let grassTileMap: SKTileMapNode // Uncut grass texture
     private let dirtTileMap: SKTileMapNode // Cut grass texture
+    private static let seed: UInt64 = getDailySeed()
+    private lazy var rng = GKMersenneTwisterRandomSource(seed: Self.seed)
+    
+    var cutCount: Int {
+        return cropMaskNode.children.count
+    }
     
     init (grassImage: String, dirtImage: String) {
         let grassTexture = SKTexture(imageNamed: grassImage)
@@ -81,6 +128,100 @@ class LandscapeNode {
         return tileMap
     }
     
+    /// Get same daily seed / landscape for all users
+    ///
+    /// - Returns:
+    ///     - The seed
+    private static func getDailySeed() -> UInt64 {
+        let calendar = Calendar(identifier: .gregorian)
+        let date = Date()
+        let components = calendar.dateComponents(in: TimeZone(secondsFromGMT: 0)!, from: date)
+        let year = UInt64(components.year ?? 0)
+        let month = UInt64(components.month ?? 0)
+        let day = UInt64(components.day ?? 0)
+        let seed = year * 10_000 + month * 100 + day
+        print("Using seed: \(seed)")
+        return seed
+    }
+    
+    /// Add obstacles to landscape
+    ///
+    /// - Parameters:
+    ///     - count: Number of obstacles
+    ///     - mowerWidth: Mower width to calculate minimum distance between obstacles
+    func addObstacles(count: Int, mowerWidth: CGFloat) {
+        let mapSize = grassTileMap.mapSize
+        var prevPoints: [CGPoint] = [CGPoint(x: 0, y: 0)]
+        for _ in 0..<count {
+            let obstacleNode = getObstacle(assetName: "rock", zPos: 2.0)
+            let minSpacing = (mowerWidth + obstacleNode.size.width) * 1.2
+            let size = obstacleNode.size
+            let point = getRandomPoint(mapSize: mapSize, obstacleSize: size, minSpacing: minSpacing, prevPoints: prevPoints)
+            obstacleNode.position = point
+            prevPoints.append(point)
+            node.addChild(obstacleNode)
+            // Add cut buffer around obstacles
+            cutGrass(at: obstacleNode.position, radius: size.width * 0.75)
+        }
+    }
+    
+    /// Get obstacle with random size and rotation
+    ///
+    /// - Parameters:
+    ///     - assetName: asset image name to make texture
+    ///     -  zPos: The z position of the obstacle
+    ///
+    /// - Returns:
+    ///     - The obstacle
+    func getObstacle(assetName: String, zPos: CGFloat) -> SKSpriteNode {
+        let obstacleTexture = SKTexture(imageNamed: "rock")
+        let obstacleSize = obstacleTexture.size()
+        let obstacleNode = SKSpriteNode(texture: obstacleTexture)
+        let randomScale = rng.nextCGFloat(in: 0.5...1.0)
+        obstacleNode.zRotation = rng.nextRotation()
+        obstacleNode.setScale(randomScale)
+        let scaledSize = CGSize(
+            width: obstacleSize.width * randomScale,
+            height: obstacleSize.height * randomScale
+        )
+        obstacleNode.physicsBody = SKPhysicsBody(texture: obstacleTexture, size: scaledSize)
+        obstacleNode.physicsBody?.isDynamic = false
+        obstacleNode.physicsBody?.categoryBitMask = PhysicsCategory.obstacle
+        obstacleNode.physicsBody?.collisionBitMask = PhysicsCategory.mower
+        obstacleNode.physicsBody?.contactTestBitMask = PhysicsCategory.mower
+        obstacleNode.zPosition = zPos
+        return obstacleNode
+    }
+    
+    /// Get random position for obstacle
+    ///
+    /// - Parameters:
+    ///     - mapSize: Grass tile map size
+    ///     - obstacleSize: Obstacle size
+    ///     - minSpacing: Minimum spacing alllowed between obstacles
+    ///     - prevPoints: Positions of previous obstacles
+    ///
+    /// - Returns:
+    ///     - The position to assign to obstacle
+    func getRandomPoint(mapSize: CGSize, obstacleSize: CGSize, minSpacing: CGFloat, prevPoints: [CGPoint]) -> CGPoint {
+        var position: CGPoint
+        var attempts = 0
+        let minRandomX = -mapSize.width / 2 + obstacleSize.width
+        let maxRandomX = mapSize.width / 2 - obstacleSize.width
+        let minRandomY = -mapSize.height / 2 + obstacleSize.height
+        let maxRandomY = mapSize.height / 2 - obstacleSize.height
+        repeat {
+            let randomX = rng.nextCGFloat(in: minRandomX ... maxRandomX)
+            let randomY = rng.nextCGFloat(in: minRandomY ... maxRandomY)
+            position = CGPoint(x: randomX, y: randomY)
+            attempts += 1
+        } while !prevPoints.allSatisfy({ $0.distance(to: position) >= minSpacing }) && attempts < 100
+        if attempts >= 100 {
+            print("OBSTACLE MAX ATTEMPTS REACHED")
+        }
+        return position
+    }
+    
     /// Cut grass by changing mask node to show bottom grass node
     ///
     /// - Parameters:
@@ -93,9 +234,6 @@ class LandscapeNode {
         cut.strokeColor = .clear
         cut.blendMode = .alpha
         cropMaskNode.addChild(cut)
-        if cropMaskNode.children.count == 100 {
-            shouldFlattenTrail = true
-        }
     }
     
     /// Add all current shape nodes in trail  to a single texture-based mask.
@@ -133,7 +271,6 @@ class LandscapeNode {
         // Remove all new cut nodes and add texture with all as child
         cropMaskNode.removeAllChildren()
         cropMaskNode.addChild(flattenedMaskNode)
-        shouldFlattenTrail = false
     }
     
     /// Move and rotate the landscape node, so mower does not move
