@@ -20,12 +20,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var entities = [GKEntity]()
     var graphs = [String : GKGraph]()
     
-    private var lastUpdateTime : TimeInterval = 0
+    private var lastUpdateTime: TimeInterval = 0
     private var mowerNode : MowerNode!
     private var landscapeNode: LandscapeNode!
-    var cameraNode : CameraNode!
+    var cameraNode: CameraNode!
     var leftHandleValue: CGFloat = 0.0
     var rightHandleValue: CGFloat = 0.0
+    var mowerAudioPlayer = MowerAudioPlayer()
     
     /// Add scene components when the scene first loads
     override func sceneDidLoad() -> Void {
@@ -41,8 +42,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         cameraNode = CameraNode()
         cameraNode.node.position = landscapeNode.originalCenter
         addChild(cameraNode.node)
+        // Add physics
         self.camera = cameraNode.node
         physicsWorld.contactDelegate = self
+        // Play mower base blade sound
+        mowerAudioPlayer.playAudio()
     }
     
     /// Update the scene before it is rendered
@@ -71,10 +75,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if moveAmount != 0.0 {
             let bladeLandscapePos = getBladePos()
             landscapeNode.cutGrass(at: bladeLandscapePos, width: mowerNode.cutWidth, height: mowerNode.cutHeight)
-            let avgPower = abs((leftPower + rightPower) / 2)
-            mowerNode.grassEmitter.particleBirthRate = 200 * avgPower
-            mowerNode.grassEmitter.particleSpeed = 500 * avgPower
-        } else { mowerNode.grassEmitter.particleBirthRate = 0 }
+            let avgPower = abs(leftPower + rightPower) / 2
+            mowerNode.setEmitterSpeed(mowerSpeed: avgPower)
+            mowerNode.setEmitterBirthRate(mowerSpeed: avgPower)
+            mowerAudioPlayer.setVolume(mowerSpeed: avgPower)
+        } else {
+            mowerNode.grassEmitter.particleBirthRate = 0
+            mowerAudioPlayer.setVolume(mowerSpeed: 0.2)
+        }
         // Position camera depending on CameraMode flag
         if cameraNode.cameraMode == .centerOnMower {
             centerCameraOnMower()

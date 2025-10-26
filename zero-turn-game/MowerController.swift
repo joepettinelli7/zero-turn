@@ -8,6 +8,7 @@ import UIKit
 
 
 protocol JoystickDelegate: AnyObject {
+    func joystickDidBegin(_ joystick: JoystickView)
     func joystickDidMove(_ joystick: JoystickView, value: CGFloat)
     func joystickDidEnd(_ joystick: JoystickView)
 }
@@ -73,6 +74,7 @@ class JoystickView: UIView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) -> Void {
         if let touch = touches.first {
             updateKnob(with: touch)
+            delegate?.joystickDidBegin(self)
         }
     }
     

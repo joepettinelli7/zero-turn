@@ -87,6 +87,16 @@ class GameViewController: UIViewController, JoystickDelegate {
     ///
     /// - Parameters:
     ///     - joystick: The joystick view that moved
+    func joystickDidBegin(_ joystick: JoystickView) -> Void {
+        if joystick == leftJoystick || joystick == rightJoystick {
+            // gameScene?.mowerAudioPlayer.playStartBlades()
+        }
+    }
+    
+    /// Must have this function to conform to Joystick delegate
+    ///
+    /// - Parameters:
+    ///     - joystick: The joystick view that moved
     ///     - value: The normalized value of joystick y position
     func joystickDidMove(_ joystick: JoystickView, value: CGFloat) -> Void {
         if gameScene?.cameraNode.cameraMode == .centerOnLandscape {
@@ -113,6 +123,7 @@ class GameViewController: UIViewController, JoystickDelegate {
         if gameScene?.leftHandleValue == 0 && gameScene?.rightHandleValue == 0 {
             if gameScene?.cameraNode.cameraMode == .centerOnMower {
                 gameScene?.cameraNode.switchCameraMode()
+                // gameScene?.mowerAudioPlayer.playStopBlades()
             }
         }
     }

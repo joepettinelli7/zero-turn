@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		19AAC8942EADA937007492FC /* audio_no_blade.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 19AAC8922EADA937007492FC /* audio_no_blade.m4a */; };
+		19AAC8952EADA937007492FC /* audio_blade_stop.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 19AAC8912EADA937007492FC /* audio_blade_stop.m4a */; };
+		19AAC8962EADA937007492FC /* audio_blade_start.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 19AAC8902EADA937007492FC /* audio_blade_start.m4a */; };
+		19AAC8982EADC46E007492FC /* audio_blade_base.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 19AAC8972EADC46E007492FC /* audio_blade_base.m4a */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		19C7A1732E9D8BED005E8436 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +31,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		19AAC8902EADA937007492FC /* audio_blade_start.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = audio_blade_start.m4a; sourceTree = "<group>"; };
+		19AAC8912EADA937007492FC /* audio_blade_stop.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = audio_blade_stop.m4a; sourceTree = "<group>"; };
+		19AAC8922EADA937007492FC /* audio_no_blade.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = audio_no_blade.m4a; sourceTree = "<group>"; };
+		19AAC8972EADC46E007492FC /* audio_blade_base.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = audio_blade_base.m4a; sourceTree = "<group>"; };
 		19C7A1592E9D8BEC005E8436 /* zero-turn-game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "zero-turn-game.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		19C7A1722E9D8BED005E8436 /* zero-turn-gameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "zero-turn-gameTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		19C7A17C2E9D8BED005E8436 /* zero-turn-gameUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "zero-turn-gameUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,6 +90,10 @@
 				19C7A1752E9D8BED005E8436 /* zero-turn-gameTests */,
 				19C7A17F2E9D8BED005E8436 /* zero-turn-gameUITests */,
 				19C7A15A2E9D8BEC005E8436 /* Products */,
+				19AAC8902EADA937007492FC /* audio_blade_start.m4a */,
+				19AAC8912EADA937007492FC /* audio_blade_stop.m4a */,
+				19AAC8922EADA937007492FC /* audio_no_blade.m4a */,
+				19AAC8972EADC46E007492FC /* audio_blade_base.m4a */,
 			);
 			sourceTree = "<group>";
 		};
@@ -212,6 +227,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				19AAC8982EADC46E007492FC /* audio_blade_base.m4a in Resources */,
+				19AAC8942EADA937007492FC /* audio_no_blade.m4a in Resources */,
+				19AAC8952EADA937007492FC /* audio_blade_stop.m4a in Resources */,
+				19AAC8962EADA937007492FC /* audio_blade_start.m4a in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
