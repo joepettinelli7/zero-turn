@@ -16,7 +16,6 @@ class MowerNode {
     let cutWidth: CGFloat
     let cutHeight: CGFloat
     let maxEmitterBirthRate: CGFloat = 200.0
-    let maxEmitterSpeed: CGFloat = 500.0
 
     init() {
         node = SKSpriteNode(imageNamed: "husqvarna")
@@ -31,7 +30,7 @@ class MowerNode {
         cutHeight = node.frame.height / 2.99
         grassEmitter = SKEmitterNode()
         setEmitterInitials()
-        grassEmitter.position = CGPoint(x: node.size.width / 2, y: bladeOffset.y)
+        grassEmitter.position = CGPoint(x: node.size.width / 2, y: bladeOffset.y - 5)
         grassEmitter.zPosition = -1
         node.addChild(grassEmitter)
     }
@@ -39,18 +38,21 @@ class MowerNode {
     /// Make the emitter for cut grass blades coming out of chute
     private func setEmitterInitials() -> Void {
         // Appearance
-        grassEmitter.particleTexture = nil
-        grassEmitter.particleColor = UIColor(red: 0, green: 0.85, blue: 0, alpha: 1.0)
+        grassEmitter.particleTexture = SKTexture(imageNamed: "grass_clipping")
+        grassEmitter.particleColor = UIColor(red: 0.5, green: 0.75, blue: 0, alpha: 1.0)
+        grassEmitter.particleColorGreenRange = 0.5
+        grassEmitter.particleColorRedRange = 0.5
         grassEmitter.particleColorBlendFactor = 1.0
-        grassEmitter.particleSize = CGSize(width: 10, height: 10)
+        grassEmitter.particleSize = CGSize(width: 30, height: 30)
         grassEmitter.particlePositionRange = CGVector(dx: 10, dy: 35)
         // Emission
         grassEmitter.particleBirthRate = 0.0
         grassEmitter.particleLifetime = 0.5
         grassEmitter.emissionAngle = -0.54
         grassEmitter.emissionAngleRange = 0.20
-        grassEmitter.particleSpeed = 0.0
+        grassEmitter.particleSpeed = 500.0
         grassEmitter.particleSpeedRange = 10
+        grassEmitter.particleRotationRange = CGFloat.pi
         // Fade and behavior
         grassEmitter.particleAlpha = 0.8
         grassEmitter.particleAlphaSpeed = -5.0
@@ -60,19 +62,11 @@ class MowerNode {
         grassEmitter.targetNode = nil
     }
     
-    /// Set emitter particle birth rate depending on mower speed
+    /// Set emitter particle birth rate depending on amount of uncut grass
     ///
     /// - Parameters:
-    ///     - mowerSpeed: New mower speed 0-1
-    func setEmitterBirthRate(mowerSpeed: CGFloat) -> Void {
-        grassEmitter.particleBirthRate = maxEmitterBirthRate * mowerSpeed
-    }
-    
-    /// Set emitter particle speed depending on mower speed
-    ///
-    /// - Parameters:
-    ///     - mowerSpeed: New mower  speed 0-1
-    func setEmitterSpeed(mowerSpeed: CGFloat) -> Void {
-        grassEmitter.particleSpeed = maxEmitterSpeed * mowerSpeed
+    ///     - cutCoverage: Percentage uncut grass under the mower 0-1
+    func setEmitterBirthRate(cutCoverage: CGFloat) -> Void {
+        grassEmitter.particleBirthRate = max(0, maxEmitterBirthRate * cutCoverage)
     }
 }

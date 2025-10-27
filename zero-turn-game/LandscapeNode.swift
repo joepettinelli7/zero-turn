@@ -6,6 +6,8 @@
 //
 import SpriteKit
 import GameplayKit
+import CoreImage
+import CoreImage.CIFilterBuiltins
 
 
 extension CGPoint {
@@ -62,8 +64,10 @@ class LandscapeNode {
     private let uncutMaskNode = SKSpriteNode() // Mask where grass is uncut
     private let grassTileMap: SKTileMapNode // Uncut grass texture
     private let dirtTileMap: SKTileMapNode // Cut grass texture
-    private static let seed: UInt64 = getDailySeed()
-    private lazy var rng = GKMersenneTwisterRandomSource(seed: Self.seed)
+    private static let seed: UInt64 = getDailySeed() // New seed generated each day
+    private lazy var rng = GKMersenneTwisterRandomSource(seed: Self.seed) // to generate random points
+    private let ciContext = CIContext(options: [.cacheIntermediates: false]) // To make grass emitter faster
+    private let areaAverageFilter = CIFilter.areaAverage() // To make grass emitter faster
     
     var cutCount: Int {
         return cropMaskNode.children.count
@@ -161,7 +165,7 @@ class LandscapeNode {
             prevPoints.append(point)
             node.addChild(obstacleNode)
             // Add cut buffer around obstacles
-            cutGrass(at: obstacleNode.position, width: size.width * 1.25, height: size.width * 1.25)
+            cutGrass(at: obstacleNode.position, size.width * 1.25, size.width * 1.25)
         }
     }
     
@@ -229,7 +233,7 @@ class LandscapeNode {
     ///     - position: The position of where to cut grass
     ///     - width: Width of rectangle
     ///     - height: Height of rectangle
-    func cutGrass(at position: CGPoint, width: CGFloat, height: CGFloat) -> Void {
+    func cutGrass(at position: CGPoint, _ width: CGFloat, _ height: CGFloat) -> Void {
         let ovalRect = CGRect(x: -width / 2, y: -height / 2, width: width, height: height)
         let cut = SKShapeNode(ellipseIn: ovalRect)
         cut.position = position
@@ -238,6 +242,38 @@ class LandscapeNode {
         cut.strokeColor = .clear
         cut.blendMode = .alpha
         cropMaskNode.addChild(cut)
+    }
+    
+    /// Get the percentage of grass under mower deck that is cut. Use
+    /// CIAreaAverage to keep data on GPU (instead of using individual pixels).
+    ///
+    /// - Parameters:
+    ///     - view: The GameScene view
+    ///     - position: The position of where to cut grass
+    ///     - width: Width of rectangle
+    ///     - height: Height of rectangle
+    ///
+    /// - Returns:
+    ///     - The percentage as decimal 0-1 so 1.0 if nothing cut
+    func getCutCoverage(using view: SKView, at position: CGPoint, _ width: CGFloat, _ height: CGFloat) -> CGFloat {
+        // Define the rectangle under mower deck (~136 x ~67) and only use that area for calculations
+        let rect = CGRect(x: position.x - (width / 2), y: position.y - (height / 2), width: width, height: height)
+        guard let maskTexture = view.texture(from: flattenedMaskNode, crop: rect) else { return 0 }
+        // Convert texture to CIImage for pixel access
+        let cgImage = maskTexture.cgImage()
+        let ciImage = CIImage(cgImage: cgImage)
+        areaAverageFilter.inputImage = ciImage
+        areaAverageFilter.extent = ciImage.extent
+        guard let outputImage = areaAverageFilter.outputImage else { return 0 }
+        var pixel = [UInt8](repeating: 0, count: 4)
+        ciContext.render(outputImage,
+                         toBitmap: &pixel,
+                         rowBytes: 4,
+                         bounds: outputImage.extent,
+                         format: .RGBA8,
+                         colorSpace: CGColorSpaceCreateDeviceRGB()
+        )
+        return 1.0 - (CGFloat(pixel[0]) / 255.0)
     }
     
     /// Add all current shape nodes in trail  to a single texture-based mask.

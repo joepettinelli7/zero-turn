@@ -74,13 +74,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Leave trail mark only if mower is moving
         if moveAmount != 0.0 {
             let bladeLandscapePos = getBladePos()
-            landscapeNode.cutGrass(at: bladeLandscapePos, width: mowerNode.cutWidth, height: mowerNode.cutHeight)
-            let avgPower = abs(leftPower + rightPower) / 2
-            mowerNode.setEmitterSpeed(mowerSpeed: avgPower)
-            mowerNode.setEmitterBirthRate(mowerSpeed: avgPower)
-            mowerAudioPlayer.setVolume(mowerSpeed: avgPower)
+            let cov = landscapeNode.getCutCoverage(using: self.view!, at: bladeLandscapePos, mowerNode.cutWidth, mowerNode.cutHeight)
+            mowerNode.setEmitterBirthRate(cutCoverage: cov)
+            landscapeNode.cutGrass(at: bladeLandscapePos, mowerNode.cutWidth, mowerNode.cutHeight)
+            let speed = abs(leftPower + rightPower) / 2
+            mowerAudioPlayer.setVolume(mowerSpeed: speed)
         } else {
-            mowerNode.grassEmitter.particleBirthRate = 0
+            mowerNode.setEmitterBirthRate(cutCoverage: 0)
             mowerAudioPlayer.setVolume(mowerSpeed: 0.2)
         }
         // Position camera depending on CameraMode flag
@@ -97,10 +97,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.lastUpdateTime = currentTime
     }
     
-    /// Get the offset position for the mower blade due to mower image not being symmetric
+    /// Get the offset position for the mower blade due to mower image not being symmetrical
     ///
     /// - Returns:
-    ///     - The blade position in world coordinates
+    ///     - The blade position in landscape coordinates
     func getBladePos() -> CGPoint {
         var landscapePos = self.convert(mowerNode.node.position, to: landscapeNode.node)
         let angle = -landscapeNode.node.zRotation
