@@ -1,5 +1,5 @@
 //
-//  MowerController.swift
+//  JoystickController.swift
 //  zero-turn-game
 //
 //  Created by Joe Pettinelli on 10/17/25.
@@ -20,6 +20,7 @@ class JoystickView: UIView {
 
     private let knob = UIView()
     private var knobCenter: CGPoint = .zero
+    private var isTouchActive = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -69,26 +70,42 @@ class JoystickView: UIView {
             self.knob.center = self.knobCenter
         }
         delegate?.joystickDidEnd(self)
+        isTouchActive = false
     }
     
+    /// Handle when joystick touches began
+    ///
+    /// - Parameters:
+    ///     - touches: Joystick touches
+    ///     - event: UIEvent
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) -> Void {
-        if let touch = touches.first {
-            updateKnob(with: touch)
-            delegate?.joystickDidBegin(self)
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+        let dx = location.x - knob.center.x
+        let dy = location.y - knob.center.y
+        let distance = sqrt(dx * dx + dy * dy)
+        // Only continue if touch is inside the joystick knob
+        guard distance <= knob.bounds.width / 2 else {
+            isTouchActive = false
+            return
         }
+        isTouchActive = true
+        updateKnob(with: touch)
+        delegate?.joystickDidBegin(self)
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) -> Void {
-        if let touch = touches.first {
-            updateKnob(with: touch)
-        }
+        guard isTouchActive, let touch = touches.first else { return }
+        updateKnob(with: touch)
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) -> Void {
+        guard isTouchActive else { return }
         resetKnob()
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) -> Void {
+        guard isTouchActive else { return }
         resetKnob()
     }
 }

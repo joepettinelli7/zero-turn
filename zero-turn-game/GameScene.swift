@@ -26,7 +26,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var cameraNode: CameraNode!
     var leftHandleValue: CGFloat = 0.0
     var rightHandleValue: CGFloat = 0.0
-    var mowerAudioPlayer = MowerAudioPlayer()
+    private var mowerAudioPlayer = MowerAudioPlayer()
+    private let flattenEvery: Int = 50
     
     /// Add scene components when the scene first loads
     override func sceneDidLoad() -> Void {
@@ -42,6 +43,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         cameraNode = CameraNode()
         cameraNode.node.position = landscapeNode.originalCenter
         addChild(cameraNode.node)
+        centerCameraOnLandscape()
         // Add physics
         self.camera = cameraNode.node
         physicsWorld.contactDelegate = self
@@ -49,52 +51,68 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         mowerAudioPlayer.playAudio()
     }
     
-    /// Update the scene before it is rendered
+    /// Update the scene before it is rendered. This
+    /// function heavily dictates FPS.
     ///
     /// - Parameters:
     ///     - currentTime: The time to set as last updated time
     override func update(_ currentTime: TimeInterval) -> Void {
-        if (self.lastUpdateTime == 0) {
-            self.lastUpdateTime = currentTime
-        }
-        // Calculate turnAmount and moveAmount
-        // Handle values in range -1.0 to 1.0
+        if self.lastUpdateTime == 0 { self.lastUpdateTime = currentTime }
         let dt = currentTime - self.lastUpdateTime
+        // If camera is centered on landscape, it means mower is idle
+        if cameraNode.cameraMode == .centerOnLandscape {
+            updateForIdle()
+        } else {
+            updateForMotion(dt: dt)
+        }
+        self.lastUpdateTime = currentTime
+    }
+    
+    /// Update mower when it is idle
+    func updateForIdle() -> Void {
+        landscapeNode.setDebugMaskHidden(false)
+        mowerNode.grassEmitter.particleBirthRate = 0
+        mowerAudioPlayer.setVolume(mowerSpeed: 0.2)
+        if landscapeNode.cutCount != 1 {
+            landscapeNode.flattenMask(using: self.view!)
+        }
+    }
+    
+    /// Update for motion
+    ///
+    /// - Parameters:
+    ///     - dt: Time since last update
+    func updateForMotion(dt: CGFloat) -> Void {
+        centerCameraOnMower()
+        landscapeNode.setDebugMaskHidden(true)
         let leftPower = leftHandleValue
         let rightPower = rightHandleValue
         let turnAmount = (rightPower - leftPower) * dt
         let moveAmount = (rightPower + leftPower) * dt
-        landscapeNode.moveAndRotate(
-            moveAmount: moveAmount,
-            turnAmount: turnAmount,
-            center: mowerNode.node.position,
-            cameraRotation: cameraNode.node.zRotation,
-            in: self
-        )
-        // Leave trail mark only if mower is moving
-        if moveAmount != 0.0 {
+        if moveAmount != 0.0 || turnAmount != 0.0 {
+            landscapeNode.moveAndRotate(
+                moveAmount: moveAmount,
+                turnAmount: turnAmount,
+                center: mowerNode.node.position,
+                cameraRotation: cameraNode.node.zRotation,
+                in: self)
             let bladeLandscapePos = getBladePos()
-            let cov = landscapeNode.getCutCoverage(using: self.view!, at: bladeLandscapePos, mowerNode.cutWidth, mowerNode.cutHeight)
+            let cov = landscapeNode.getCutCoverage(using: self.view!,
+                                                   at: bladeLandscapePos,
+                                                   mowerNode.cutWidth,
+                                                   mowerNode.cutHeight)
             mowerNode.setEmitterBirthRate(cutCoverage: cov)
-            landscapeNode.cutGrass(at: bladeLandscapePos, mowerNode.cutWidth, mowerNode.cutHeight)
-            let speed = abs(leftPower + rightPower) / 2
+            let speed = abs(leftPower + rightPower) * 0.5
             mowerAudioPlayer.setVolume(mowerSpeed: speed)
-        } else {
-            mowerNode.setEmitterBirthRate(cutCoverage: 0)
-            mowerAudioPlayer.setVolume(mowerSpeed: 0.2)
+            if cov > 0.0 {
+                landscapeNode.cutGrass(at: bladeLandscapePos,
+                                       mowerNode.cutWidth,
+                                       mowerNode.cutHeight)
+            }
+            if landscapeNode.cutCount >= flattenEvery {
+                landscapeNode.flattenMask(using: self.view!)
+            }
         }
-        // Position camera depending on CameraMode flag
-        if cameraNode.cameraMode == .centerOnMower {
-            centerCameraOnMower()
-        } else { centerCameraOnLandscape() }
-        // Flatten cut nodes into single texture
-        let cutCount = landscapeNode.cutCount
-        if cutCount % 100 == 0 && cutCount != 0 {
-            landscapeNode.flattenMask(using: self.view!)
-        }
-        // Display uncut mask to user
-        landscapeNode.setDebugMaskVisible(cameraNode.cameraMode == .centerOnLandscape)
-        self.lastUpdateTime = currentTime
     }
     
     /// Get the offset position for the mower blade due to mower image not being symmetrical
@@ -113,6 +131,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     /// Center the camera on the center of landscape
     func centerCameraOnLandscape() -> Void {
+        assert(cameraNode.cameraMode == .centerOnLandscape)
         let centerInLandscape = landscapeNode.originalCenter
         let centerInScene = landscapeNode.node.convert(centerInLandscape, to: self)
         let moveAction = SKAction.move(to: centerInScene, duration: 0.2)
@@ -125,6 +144,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     /// Center the camera on the mower
     func centerCameraOnMower() -> Void {
+        assert(cameraNode.cameraMode == .centerOnMower)
         let targetPosition = mowerNode.node.position
         let moveAction = SKAction.move(to: targetPosition, duration: 0.1)
         let zoomAction = SKAction.scale(to: 0.80, duration: 0.1)

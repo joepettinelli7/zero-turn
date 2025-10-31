@@ -89,7 +89,6 @@ class LandscapeNode {
         
         uncutMaskNode.color = .red
         uncutMaskNode.size = grassTileMap.mapSize
-        uncutMaskNode.position = CGPoint(x: 0, y: 0)
         uncutMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         uncutMaskNode.alpha = 0.4
         uncutMaskNode.zPosition = 1.0
@@ -139,7 +138,7 @@ class LandscapeNode {
     private static func getDailySeed() -> UInt64 {
         let calendar = Calendar(identifier: .gregorian)
         let date = Date()
-        let components = calendar.dateComponents(in: TimeZone(secondsFromGMT: 0)!, from: date)
+        let components = calendar.dateComponents(in: TimeZone.current, from: date)
         let year = UInt64(components.year ?? 0)
         let month = UInt64(components.month ?? 0)
         let day = UInt64(components.day ?? 0)
@@ -345,7 +344,9 @@ class LandscapeNode {
     ///
     /// - Parameters:
     ///     - visible: Whether uncut mask should be visible
-    func setDebugMaskVisible(_ visible: Bool) -> Void {
-        uncutMaskNode.isHidden = !visible
+    func setDebugMaskHidden(_ hidden: Bool) -> Void {
+        if uncutMaskNode.isHidden != hidden {
+            uncutMaskNode.isHidden = hidden
+        }
     }
 }
