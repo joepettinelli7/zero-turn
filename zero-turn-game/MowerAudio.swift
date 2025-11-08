@@ -38,9 +38,28 @@ class MowerAudioPlayer: NSObject, ObservableObject {
         }
     }
     
-    /// Stop audio
-    func stopAudio() -> Void {
-        player?.stop()
+    /// Stop audio gradually. Run in background.
+    ///
+    /// - Parameters:
+    ///     - fadeDuration: Number of seconds to fade sound for
+    func graduallyStopAudio(fadeDuration: TimeInterval = 1.5) -> Void {
+        guard let player = player, player.isPlaying else { return }
+        let fadeSteps = 30
+        let timePerStep = fadeDuration / Double(fadeSteps)
+        let volumeStep = player.volume / Float(fadeSteps)
+        DispatchQueue.global(qos: .userInitiated).async {
+            for _ in 0..<fadeSteps {
+                DispatchQueue.main.async {
+                    player.volume = max(0, player.volume - volumeStep)
+                }
+                Thread.sleep(forTimeInterval: timePerStep)
+            }
+            DispatchQueue.main.async {
+                player.stop()
+                player.currentTime = 0
+                player.volume = 0.5
+            }
+        }
     }
     
     /// Set volume as function of mower speed

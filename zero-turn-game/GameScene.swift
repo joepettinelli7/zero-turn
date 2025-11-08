@@ -156,7 +156,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         cameraNode.node.run(actionGroup)
     }
     
+    /// Toggle the red mask visibility
     func toggleRedMaskHidden() -> Void {
         landscapeNode.toggleRedMaskHidden()
+    }
+    
+    /// Remove red mask, zoom out camera, rotate camera to align with landscape, stop audio
+    func onGameEnd() {
+        landscapeNode.setRedMaskHidden(true)
+        cameraNode.cameraMode = .centerOnLandscape
+        let targetPosition = landscapeNode.node.convert(landscapeNode.originalCenter, to: self)
+        let moveAction = SKAction.move(to: targetPosition, duration: 2.0)
+        let rotateAction = SKAction.rotate(toAngle: landscapeNode.node.zRotation, duration: 2.0)
+        let zoomAction = SKAction.scale(to: 2.0, duration: 2.0)
+        moveAction.timingMode = .easeInEaseOut
+        rotateAction.timingMode = .easeInEaseOut
+        zoomAction.timingMode = .easeInEaseOut
+        let actionGroup = SKAction.group([moveAction, rotateAction, zoomAction])
+        cameraNode.node.run(actionGroup)
+        mowerAudioPlayer.graduallyStopAudio(fadeDuration: 2.0)
     }
 }

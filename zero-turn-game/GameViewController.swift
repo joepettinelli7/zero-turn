@@ -256,8 +256,54 @@ class GameViewController: UIViewController, JoystickDelegate {
                 brightness: 1.0,
                 alpha: 1.0
             )
-            self.progressLabel.text = String(format: "%.0f%%", clamped * 100)
+            self.progressLabel.text = String(format: "%.0f%%", floor(clamped * 100))
         }
+        if coverage == 1.0 {
+            onGameEnd()
+        }
+    }
+    
+    /// Call this function when the game ends
+    private func onGameEnd() -> Void {
+        gameScene?.onGameEnd()
+        redMaskButton.isEnabled = false
+        redMaskButton.isHidden = true
+        leftJoystick.isUserInteractionEnabled = false
+        leftJoystick.isHidden = true
+        rightJoystick.isUserInteractionEnabled = false
+        rightJoystick.isHidden = true
+        progressContainer.isHidden = true
+        progressFill.isHidden = true
+        progressLabel.isHidden = true
+        animateTimerLabelOnGameEnd()
+    }
+    
+    /// Animate the timer label on game end to move to center
+    /// of the screen and then continuously  blink in and out
+    private func animateTimerLabelOnGameEnd() -> Void {
+        guard let view = timerLabel.superview else { return }
+        view.removeConstraints(view.constraints.filter {
+            $0.firstItem as? UILabel == timerLabel || $0.secondItem as? UILabel == timerLabel
+        })
+        NSLayoutConstraint.activate([
+            timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            timerLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        UIView.animate(withDuration: 2.0,
+                       delay: 0,
+                       usingSpringWithDamping: 0.8,
+                       initialSpringVelocity: 0.4,
+                       options: [.curveEaseInOut],
+                       animations: {
+            view.layoutIfNeeded()
+            let t = CGAffineTransform(scaleX: 2.0, y: 2.0)
+            self.timerLabel.transform = t}, completion: nil)
+        UIView.animate(withDuration: 0.5,
+                       delay: 0.0,
+                       options: [.autoreverse, .repeat, .allowUserInteraction],
+                       animations: {
+            self.timerLabel.alpha = 0.0
+        }, completion: nil)
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {

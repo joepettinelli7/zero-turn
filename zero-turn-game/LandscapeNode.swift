@@ -176,14 +176,21 @@ class LandscapeNode {
     ///     - count: Number of obstacles
     ///     - mowerWidth: Mower width to calculate minimum distance between obstacles
     func addObstacles(count: Int, mowerWidth: CGFloat) {
-        let mapSize = grassTileMap.mapSize
+        let obstaclesRect = CGSize(
+            width: grassTileMap.mapSize.width - mowerWidth,
+            height: grassTileMap.mapSize.height - mowerWidth
+        )
         var prevPoints: [CGPoint] = [CGPoint(x: 0, y: 0)]
         for _ in 0..<count {
             let obstacleNode = getObstacle(assetName: "rock", zPos: 2.0)
             let minSpacing = (mowerWidth + obstacleNode.size.width) * 1.3
             let size = obstacleNode.size
             let obstacleLongSide = max(size.width, size.height)
-            let point = getRandomPoint(mapSize: mapSize, obstacleSize: size, minSpacing: minSpacing, prevPoints: prevPoints)
+            let point = getRandomPoint(mapSize: obstaclesRect,
+                                       obstacleSize: size,
+                                       minSpacing: minSpacing,
+                                       prevPoints: prevPoints
+            )
             obstacleNode.position = point
             prevPoints.append(point)
             node.addChild(obstacleNode)
@@ -223,7 +230,7 @@ class LandscapeNode {
     /// Get random position for obstacle
     ///
     /// - Parameters:
-    ///     - mapSize: Grass tile map size
+    ///     - mapSize: grassTileMap size
     ///     - obstacleSize: Obstacle size
     ///     - minSpacing: Minimum spacing alllowed between obstacles
     ///     - prevPoints: Positions of previous obstacles
@@ -433,15 +440,5 @@ class LandscapeNode {
     /// Toggle the visibility
     func toggleRedMaskHidden() -> Void {
         redMaskNode.isHidden = !redMaskNode.isHidden
-    }
-    
-    /// Determine whether a rect is contained by landscape
-    ///
-    /// - Parameters:
-    ///     - rect: The rectangle in landscape coordinates
-    /// - Returns:
-    ///     - True if rect is contained in landscape bounds
-    func containsRect(rect: CGRect) -> Bool {
-        return true
     }
 }
