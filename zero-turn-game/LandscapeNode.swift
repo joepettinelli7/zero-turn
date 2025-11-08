@@ -58,41 +58,45 @@ class LandscapeNode {
     let offsetRot: CGFloat = CGFloat.pi / 2  // 90 degrees counter-clockwise
     let originalCenter: CGPoint
     
-    private let cropNode = SKCropNode() // Crop the dirtTileMap until cut
+    private let cropNode = SKCropNode() // Crop and cover the shortGrassTileMap until cut
     private let cropMaskNode = SKNode() // Mask for cropNode
-    private let flattenedMaskNode = SKSpriteNode() // To create texture of all cut nodes
-    private let uncutMaskNode = SKSpriteNode() // Mask where grass is uncut
-    private let grassTileMap: SKTileMapNode // Uncut grass texture
-    private let dirtTileMap: SKTileMapNode // Cut grass texture
+    private let flattenedMaskNode = SKSpriteNode() // To create single texture of all cut nodes
+    private let redMaskNode = SKSpriteNode() // Mask where grass is uncut for user
+    private let grassTileMap: SKTileMapNode // Uncut grass texture to remove and cover
+    private let shortGrassTileMap: SKTileMapNode // Cut grass texture to expose
     private static let seed: UInt64 = getDailySeed() // New seed generated each day
     private lazy var rng = GKMersenneTwisterRandomSource(seed: Self.seed) // to generate random points
     private let ciContext = CIContext(options: [.cacheIntermediates: false]) // To make grass emitter faster
     private let areaAverageFilter = CIFilter.areaAverage() // To make grass emitter faster
+    var totalCutCoverage: CGFloat = 0.0
     
     var cutCount: Int {
         return cropMaskNode.children.count
     }
     
-    init (grassImage: String, dirtImage: String) {
+    init (grassImage: String, shortGrassImage: String) {
         let grassTexture = SKTexture(imageNamed: grassImage)
         grassTileMap = Self.setupTileMap(texture: grassTexture, nRows: 2, nCols: 1, zPos: 0.0)
         node.addChild(grassTileMap)
-        let dirtTexture = SKTexture(imageNamed: dirtImage)
-        dirtTileMap = Self.setupTileMap(texture: dirtTexture, nRows: 9, nCols: 5, zPos: 1.0)
+        let shortGrassTexture = SKTexture(imageNamed: shortGrassImage)
+        shortGrassTileMap = Self.setupTileMap(texture: shortGrassTexture, nRows: 10, nCols: 5, zPos: 1.0)
+        
         cropNode.maskNode = cropMaskNode
-        cropNode.addChild(dirtTileMap)
+        cropNode.addChild(shortGrassTileMap)
         cropNode.zPosition = 1.0
         node.addChild(cropNode)
+        flattenedMaskNode.size = shortGrassTileMap.mapSize
         flattenedMaskNode.position = CGPoint(x: 0, y: 0)
         flattenedMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         cropMaskNode.addChild(flattenedMaskNode)
         
-        uncutMaskNode.color = .red
-        uncutMaskNode.size = grassTileMap.mapSize
-        uncutMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        uncutMaskNode.alpha = 0.4
-        uncutMaskNode.zPosition = 1.0
-        cropNode.addChild(uncutMaskNode)
+        redMaskNode.color = .red
+        redMaskNode.size = shortGrassTileMap.mapSize
+        redMaskNode.position = CGPoint(x: 0, y: 0)
+        redMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        redMaskNode.alpha = 0.4
+        redMaskNode.zPosition = 1.0
+        cropNode.addChild(redMaskNode)
         
         // Set originalCenter for camera node later
         let frame = node.calculateAccumulatedFrame()
@@ -147,6 +151,25 @@ class LandscapeNode {
         return seed
     }
     
+    /// Add physics body around edge of grassTileMap so mower cannot leave
+    /// that area, and cannot add cut nodes outside of this frame.
+    private func updatePhysicsEdges() -> Void {
+        node.physicsBody = nil
+        let size = grassTileMap.mapSize
+        let rect = CGRect(
+            x: -size.width / 2,
+            y: -size.height / 2,
+            width: size.width,
+            height: size.height
+        )
+        let path = CGPath(rect: rect, transform: nil)
+        node.physicsBody = SKPhysicsBody(edgeLoopFrom: path)
+        node.physicsBody?.isDynamic = false
+        node.physicsBody?.categoryBitMask = PhysicsCategory.obstacle
+        node.physicsBody?.contactTestBitMask = PhysicsCategory.mower
+        node.physicsBody?.collisionBitMask = PhysicsCategory.mower
+    }
+    
     /// Add obstacles to landscape
     ///
     /// - Parameters:
@@ -157,14 +180,15 @@ class LandscapeNode {
         var prevPoints: [CGPoint] = [CGPoint(x: 0, y: 0)]
         for _ in 0..<count {
             let obstacleNode = getObstacle(assetName: "rock", zPos: 2.0)
-            let minSpacing = (mowerWidth + obstacleNode.size.width) * 1.2
+            let minSpacing = (mowerWidth + obstacleNode.size.width) * 1.3
             let size = obstacleNode.size
+            let obstacleLongSide = max(size.width, size.height)
             let point = getRandomPoint(mapSize: mapSize, obstacleSize: size, minSpacing: minSpacing, prevPoints: prevPoints)
             obstacleNode.position = point
             prevPoints.append(point)
             node.addChild(obstacleNode)
             // Add cut buffer around obstacles
-            cutGrass(at: obstacleNode.position, size.width * 1.25, size.width * 1.25)
+            cutGrass(at: obstacleNode.position, obstacleLongSide + 50, obstacleLongSide + 50)
         }
     }
     
@@ -253,9 +277,9 @@ class LandscapeNode {
     ///     - height: Height of rectangle
     ///
     /// - Returns:
-    ///     - The percentage as decimal 0-1 so 1.0 if nothing cut
-    func getCutCoverage(using view: SKView, at position: CGPoint, _ width: CGFloat, _ height: CGFloat) -> CGFloat {
-        // Define the rectangle under mower deck (~136 x ~67) and only use that area for calculations
+    ///     - The percentage as decimal 0-1 so 1.0 if nothing cut and 0.0 if everything is cut.
+    func getMowerCutCoverage(using view: SKView, at position: CGPoint, _ width: CGFloat, _ height: CGFloat) -> CGFloat {
+        // If rectangle under mower deck (~136 x ~67) and only use that area for calculations.
         let rect = CGRect(x: position.x - (width / 2), y: position.y - (height / 2), width: width, height: height)
         guard let maskTexture = view.texture(from: flattenedMaskNode, crop: rect) else { return 0 }
         // Convert texture to CIImage for pixel access
@@ -310,8 +334,63 @@ class LandscapeNode {
         // Remove all new cut nodes and add texture with all as child
         cropMaskNode.removeAllChildren()
         cropMaskNode.addChild(flattenedMaskNode)
+        // Update total cut coverage
+        updateTotalCutCoverage(using: view) { coverage in }
     }
     
+    /// Update the total cut coverage of the shortGrassTileMap. Downsize
+    /// the node so that calculation is faster. A value of 0.0 means
+    /// nothing is cut, 1.0 means everything is cut.
+    ///
+    /// - Parameters:
+    ///     - view: The GameScene view
+    ///     - completion: Completion closure to run after
+    func updateTotalCutCoverage(using view: SKView, completion: @escaping (CGFloat) -> Void) {
+        // Must capture texture on main thread
+        let frameInMaskSpace = flattenedMaskNode.convert(shortGrassTileMap.frame,
+                                                         from: shortGrassTileMap.parent!
+        )
+        let renderScale: CGFloat = 0.25
+        let scaledRect = CGRect(
+                x: frameInMaskSpace.origin.x * renderScale,
+                y: frameInMaskSpace.origin.y * renderScale,
+                width: frameInMaskSpace.size.width * renderScale,
+                height: frameInMaskSpace.size.height * renderScale
+        )
+        let smallMaskNode = flattenedMaskNode.copy() as! SKSpriteNode
+        smallMaskNode.setScale(renderScale)
+        guard let smallMaskTexture = view.texture(from: smallMaskNode, crop: scaledRect) else {
+            completion(0)
+            return
+        }
+        let cgImage = smallMaskTexture.cgImage()
+        // Do CI processing on a background queue
+        DispatchQueue.global(qos: .userInitiated).async {
+            let ciImage = CIImage(cgImage: cgImage)
+            self.areaAverageFilter.inputImage = ciImage
+            self.areaAverageFilter.extent = ciImage.extent
+            guard let outputImage = self.areaAverageFilter.outputImage else {
+                DispatchQueue.main.async { completion(0) }
+                return
+            }
+            var pixel = [UInt8](repeating: 0, count: 4)
+            self.ciContext.render(
+                outputImage,
+                toBitmap: &pixel,
+                rowBytes: 4,
+                bounds: outputImage.extent,
+                format: .RGBA8,
+                colorSpace: CGColorSpaceCreateDeviceRGB()
+            )
+            let totalCutCoverage = CGFloat(pixel[0]) / 255.0
+            // Return the result to the main thread safely
+            DispatchQueue.main.async {
+                self.totalCutCoverage = totalCutCoverage
+                completion(totalCutCoverage)
+            }
+        }
+    }
+
     /// Move and rotate the landscape node, so mower does not move
     ///
     /// - Parameters:
@@ -338,15 +417,31 @@ class LandscapeNode {
         rotatedPos = rotatedPos.applying(transform)
         node.position = rotatedPos
         node.zRotation += rotation
+        updatePhysicsEdges()
     }
     
-    /// Toggle visibibility to highlight uncut regions
+    /// Toggle visibility to highlight uncut regions
     ///
     /// - Parameters:
     ///     - visible: Whether uncut mask should be visible
-    func setDebugMaskHidden(_ hidden: Bool) -> Void {
-        if uncutMaskNode.isHidden != hidden {
-            uncutMaskNode.isHidden = hidden
+    func setRedMaskHidden(_ hidden: Bool) -> Void {
+        if redMaskNode.isHidden != hidden {
+            redMaskNode.isHidden = hidden
         }
+    }
+    
+    /// Toggle the visibility
+    func toggleRedMaskHidden() -> Void {
+        redMaskNode.isHidden = !redMaskNode.isHidden
+    }
+    
+    /// Determine whether a rect is contained by landscape
+    ///
+    /// - Parameters:
+    ///     - rect: The rectangle in landscape coordinates
+    /// - Returns:
+    ///     - True if rect is contained in landscape bounds
+    func containsRect(rect: CGRect) -> Bool {
+        return true
     }
 }

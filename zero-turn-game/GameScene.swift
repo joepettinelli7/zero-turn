@@ -29,6 +29,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var mowerAudioPlayer = MowerAudioPlayer()
     private let flattenEvery: Int = 50
     
+    var totalCutCoverage: CGFloat {
+        return landscapeNode.totalCutCoverage
+    }
+    
     /// Add scene components when the scene first loads
     override func sceneDidLoad() -> Void {
         // Add mower to control
@@ -36,8 +40,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         mowerNode.node.position = CGPoint(x: frame.midX, y: frame.midY)
         addChild(mowerNode.node)
         // Add landscape node which includes grass, trail marks, etc.
-        landscapeNode = LandscapeNode(grassImage: "grass_long", dirtImage: "grass_short")
-        landscapeNode.addObstacles(count: 2, mowerWidth: mowerNode.node.frame.width)
+        landscapeNode = LandscapeNode(grassImage: "grass_long", shortGrassImage: "grass_short")
+        landscapeNode.addObstacles(count: 2, mowerWidth: mowerNode.node.size.width)
         addChild(landscapeNode.node)
         // Add camera node
         cameraNode = CameraNode()
@@ -70,7 +74,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     /// Update mower when it is idle
     func updateForIdle() -> Void {
-        landscapeNode.setDebugMaskHidden(false)
         mowerNode.grassEmitter.particleBirthRate = 0
         mowerAudioPlayer.setVolume(mowerSpeed: 0.2)
         if landscapeNode.cutCount != 1 {
@@ -84,7 +87,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     ///     - dt: Time since last update
     func updateForMotion(dt: CGFloat) -> Void {
         centerCameraOnMower()
-        landscapeNode.setDebugMaskHidden(true)
         let leftPower = leftHandleValue
         let rightPower = rightHandleValue
         let turnAmount = (rightPower - leftPower) * dt
@@ -97,10 +99,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 cameraRotation: cameraNode.node.zRotation,
                 in: self)
             let bladeLandscapePos = getBladePos()
-            let cov = landscapeNode.getCutCoverage(using: self.view!,
-                                                   at: bladeLandscapePos,
-                                                   mowerNode.cutWidth,
-                                                   mowerNode.cutHeight)
+            let cov = landscapeNode.getMowerCutCoverage(using: self.view!,
+                                                        at: bladeLandscapePos,
+                                                        mowerNode.cutWidth,
+                                                        mowerNode.cutHeight)
             mowerNode.setEmitterBirthRate(cutCoverage: cov)
             let speed = abs(leftPower + rightPower) * 0.5
             mowerAudioPlayer.setVolume(mowerSpeed: speed)
@@ -152,5 +154,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         zoomAction.timingMode = .easeInEaseOut
         let actionGroup = SKAction.group([moveAction, zoomAction])
         cameraNode.node.run(actionGroup)
+    }
+    
+    func toggleRedMaskHidden() -> Void {
+        landscapeNode.toggleRedMaskHidden()
     }
 }
