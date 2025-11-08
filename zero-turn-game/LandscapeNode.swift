@@ -99,8 +99,8 @@ class LandscapeNode {
         cropNode.addChild(redMaskNode)
         
         // Set originalCenter for camera node later
-        let frame = node.calculateAccumulatedFrame()
-        originalCenter = CGPoint(x: frame.midX, y: frame.midY)
+        originalCenter = CGPoint(x: node.frame.midX, y: node.frame.midY)
+        fillOuterCutArea()
     }
     
     /// Setup tilemap. Make static so it can be called before
@@ -133,6 +133,57 @@ class LandscapeNode {
             }
         }
         return tileMap
+    }
+    
+    /// Fill the area between the shortGrassTileMap and grassTileMap
+    /// with white mask nodes so this area is already counted as cut.
+    /// This make reaching 100% cut coverage much more accurate
+    /// and aligned with the redMaskNode.
+    func fillOuterCutArea() -> Void {
+        let outerFrame = grassTileMap.frame
+        let innerFrame = shortGrassTileMap.frame
+        let topRect = CGRect(
+            x: outerFrame.minX,
+            y: innerFrame.maxY,
+            width: outerFrame.width,
+            height: outerFrame.maxY - innerFrame.maxY
+        )
+        let bottomRect = CGRect(
+            x: outerFrame.minX,
+            y: outerFrame.minY,
+            width: outerFrame.width,
+            height: innerFrame.minY - outerFrame.minY
+        )
+        let leftRect = CGRect(
+            x: outerFrame.minX,
+            y: innerFrame.minY,
+            width: innerFrame.minX - outerFrame.minX,
+            height: innerFrame.height
+        )
+        let rightRect = CGRect(
+            x: innerFrame.maxX,
+            y: innerFrame.minY,
+            width: outerFrame.maxX - innerFrame.maxX,
+            height: innerFrame.height
+        )
+        
+        /// Helper function
+        ///
+        /// - Parameters:
+        ///     - Rect between the shortGrassTileMap and grassTileMap
+        func addCutRect(_ rect: CGRect) -> Void {
+            guard rect.width > 0, rect.height > 0 else { return }
+            let cut = SKShapeNode(rect: rect)
+            cut.fillColor = .white
+            cut.strokeColor = .clear
+            cut.blendMode = .alpha
+            cropMaskNode.addChild(cut)
+        }
+
+        addCutRect(topRect)
+        addCutRect(bottomRect)
+        addCutRect(leftRect)
+        addCutRect(rightRect)
     }
     
     /// Get same daily seed / landscape for all users
@@ -195,7 +246,7 @@ class LandscapeNode {
             prevPoints.append(point)
             node.addChild(obstacleNode)
             // Add cut buffer around obstacles
-            cutGrass(at: obstacleNode.position, obstacleLongSide + 50, obstacleLongSide + 50)
+            cutGrass(at: obstacleNode.position, obstacleLongSide + 60, obstacleLongSide + 60)
         }
     }
     

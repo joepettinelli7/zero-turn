@@ -174,6 +174,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         zoomAction.timingMode = .easeInEaseOut
         let actionGroup = SKAction.group([moveAction, rotateAction, zoomAction])
         cameraNode.node.run(actionGroup)
-        mowerAudioPlayer.graduallyStopAudio(fadeDuration: 2.0)
+        mowerAudioPlayer.setVolume(mowerSpeed: 0.2)
+        mowerAudioPlayer.stop()
     }
 }
