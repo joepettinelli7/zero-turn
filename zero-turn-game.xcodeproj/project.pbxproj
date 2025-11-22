@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		199966A62ECD66C7001B9740 /* audio_click.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 199966A52ECD66C7001B9740 /* audio_click.m4a */; };
 		19AAC8942EADA937007492FC /* audio_no_blade.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 19AAC8922EADA937007492FC /* audio_no_blade.m4a */; };
 		19AAC8952EADA937007492FC /* audio_blade_stop.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 19AAC8912EADA937007492FC /* audio_blade_stop.m4a */; };
 		19AAC8962EADA937007492FC /* audio_blade_start.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 19AAC8902EADA937007492FC /* audio_blade_start.m4a */; };
@@ -31,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		199966A52ECD66C7001B9740 /* audio_click.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = audio_click.m4a; sourceTree = "<group>"; };
 		19AAC8902EADA937007492FC /* audio_blade_start.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = audio_blade_start.m4a; sourceTree = "<group>"; };
 		19AAC8912EADA937007492FC /* audio_blade_stop.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = audio_blade_stop.m4a; sourceTree = "<group>"; };
 		19AAC8922EADA937007492FC /* audio_no_blade.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = audio_no_blade.m4a; sourceTree = "<group>"; };
@@ -94,6 +96,7 @@
 				19AAC8912EADA937007492FC /* audio_blade_stop.m4a */,
 				19AAC8922EADA937007492FC /* audio_no_blade.m4a */,
 				19AAC8972EADC46E007492FC /* audio_blade_base.m4a */,
+				199966A52ECD66C7001B9740 /* audio_click.m4a */,
 			);
 			sourceTree = "<group>";
 		};
@@ -227,6 +230,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				199966A62ECD66C7001B9740 /* audio_click.m4a in Resources */,
 				19AAC8982EADC46E007492FC /* audio_blade_base.m4a in Resources */,
 				19AAC8942EADA937007492FC /* audio_no_blade.m4a in Resources */,
 				19AAC8952EADA937007492FC /* audio_blade_stop.m4a in Resources */,

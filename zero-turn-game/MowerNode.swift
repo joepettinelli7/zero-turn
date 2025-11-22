@@ -30,14 +30,14 @@ class MowerNode {
         cutHeight = node.frame.height / 2.99
         grassEmitter = SKEmitterNode()
         setEmitterInitials()
-        grassEmitter.position = CGPoint(x: node.size.width / 2, y: bladeOffset.y - 5)
-        grassEmitter.zPosition = -1
         node.addChild(grassEmitter)
     }
     
     /// Make the emitter for cut grass blades coming out of chute
     private func setEmitterInitials() -> Void {
         // Appearance
+        grassEmitter.position = CGPoint(x: node.size.width / 2, y: bladeOffset.y - 5)
+        grassEmitter.zPosition = -1
         grassEmitter.particleTexture = SKTexture(imageNamed: "grass_clipping")
         grassEmitter.particleColor = UIColor(red: 0.5, green: 0.75, blue: 0, alpha: 1.0)
         grassEmitter.particleColorGreenRange = 0.5
@@ -68,5 +68,10 @@ class MowerNode {
     ///     - cutCoverage: Percentage uncut grass under the mower 0-1
     func setEmitterBirthRate(cutCoverage: CGFloat) -> Void {
         grassEmitter.particleBirthRate = max(0, maxEmitterBirthRate * cutCoverage)
+    }
+    
+    /// Reset to initial state
+    func resetEmitter() -> Void {
+        setEmitterInitials()
     }
 }

@@ -36,6 +36,7 @@ class JoystickView: UIView {
     private func setup() -> Void {
         // Create rectangular background
         backgroundColor = UIColor.darkGray
+        backgroundColor = UIColor.darkGray.withAlphaComponent(0.5)
         layer.cornerRadius = bounds.width / 4
         clipsToBounds = true
         // Create knob for user touch
@@ -45,6 +46,7 @@ class JoystickView: UIView {
         knob.backgroundColor = .white
         knobCenter = CGPoint(x: bounds.midX, y: bounds.midY)
         knob.center = knobCenter
+        knob.backgroundColor = UIColor.white.withAlphaComponent(0.7)
         addSubview(knob)
         isUserInteractionEnabled = true
     }

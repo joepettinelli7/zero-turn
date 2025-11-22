@@ -11,10 +11,12 @@ import AVFoundation
 class MowerAudioPlayer: NSObject, ObservableObject {
     
     private var player: AVAudioPlayer?
+    private var clickPlayer: AVAudioPlayer?
 
     override init() {
         super.init()
         preloadAudio()
+        preloadClickAudio()
     }
     
     /// Preload audio to make playing audio faster
@@ -23,10 +25,23 @@ class MowerAudioPlayer: NSObject, ObservableObject {
             do {
                 player = try AVAudioPlayer(contentsOf: url)
                 player?.numberOfLoops = -1
-                player?.volume = 0.5
+                player?.volume = 0.2
                 player?.prepareToPlay()
             } catch {
                 print("Error loading audio: \(error)")
+            }
+        }
+    }
+    
+    /// Preload the audio to play when a button is clicked
+    private func preloadClickAudio() -> Void {
+        if let url = Bundle.main.url(forResource: "audio_click", withExtension: "m4a") {
+            do {
+                clickPlayer = try AVAudioPlayer(contentsOf: url)
+                clickPlayer?.volume = 1.0
+                clickPlayer?.prepareToPlay()
+            } catch {
+                print("Error loading click sound: \(error)")
             }
         }
     }
@@ -36,6 +51,12 @@ class MowerAudioPlayer: NSObject, ObservableObject {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.player?.play()
         }
+    }
+    
+    /// Play the click sound from button tap
+    func playClickAudio() -> Void {
+        clickPlayer?.currentTime = 0
+        clickPlayer?.play()
     }
     
     /// Stop audio player
@@ -78,6 +99,12 @@ class MowerAudioPlayer: NSObject, ObservableObject {
     ///     - mowerSpeed: Mower speed in scene
     func setVolume(mowerSpeed: CGFloat) -> Void {
         player?.volume = max(Float(mowerSpeed), 0.2)
+    }
+    
+    /// Reset to initial state
+    func reset() -> Void {
+        player?.volume = 0.2
+        playAudio()
     }
 }
 

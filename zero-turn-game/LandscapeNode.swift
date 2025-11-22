@@ -69,6 +69,7 @@ class LandscapeNode {
     private let ciContext = CIContext(options: [.cacheIntermediates: false]) // To make grass emitter faster
     private let areaAverageFilter = CIFilter.areaAverage() // To make grass emitter faster
     var totalCutCoverage: CGFloat = 0.0
+    var flattenEvery: Int = 150
     
     var cutCount: Int {
         return cropMaskNode.children.count
@@ -177,6 +178,7 @@ class LandscapeNode {
             cut.fillColor = .white
             cut.strokeColor = .clear
             cut.blendMode = .alpha
+            cut.name = "permanent"
             cropMaskNode.addChild(cut)
         }
 
@@ -246,7 +248,7 @@ class LandscapeNode {
             prevPoints.append(point)
             node.addChild(obstacleNode)
             // Add cut buffer around obstacles
-            cutGrass(at: obstacleNode.position, obstacleLongSide + 60, obstacleLongSide + 60)
+            cutGrass(at: obstacleNode.position, obstacleLongSide + 60, obstacleLongSide + 60, "permanent")
         }
     }
     
@@ -314,9 +316,11 @@ class LandscapeNode {
     ///     - position: The position of where to cut grass
     ///     - width: Width of rectangle
     ///     - height: Height of rectangle
-    func cutGrass(at position: CGPoint, _ width: CGFloat, _ height: CGFloat) -> Void {
+    ///     - name: Name of cut node
+    func cutGrass(at position: CGPoint, _ width: CGFloat, _ height: CGFloat, _ name: String = "cutnode") -> Void {
         let ovalRect = CGRect(x: -width / 2, y: -height / 2, width: width, height: height)
         let cut = SKShapeNode(ellipseIn: ovalRect)
+        cut.name = name
         cut.position = position
         cut.zRotation = -node.zRotation
         cut.fillColor = .white
@@ -346,18 +350,18 @@ class LandscapeNode {
         areaAverageFilter.inputImage = ciImage
         areaAverageFilter.extent = ciImage.extent
         guard let outputImage = areaAverageFilter.outputImage else { return 0 }
-        var pixel = [UInt8](repeating: 0, count: 4)
+        var pixel = [UInt16](repeating: 0, count: 4)
         ciContext.render(outputImage,
                          toBitmap: &pixel,
-                         rowBytes: 4,
+                         rowBytes: MemoryLayout<UInt16>.size * 4,
                          bounds: outputImage.extent,
-                         format: .RGBA8,
+                         format: .RGBA16,
                          colorSpace: CGColorSpaceCreateDeviceRGB()
         )
-        return 1.0 - (CGFloat(pixel[0]) / 255.0)
+        return 1.0 - (CGFloat(pixel[0]) / 65535.0)
     }
     
-    /// Add all current shape nodes in trail  to a single texture-based mask.
+    /// Add all current shape nodes in trail to a single texture-based mask.
     /// This significantly increases performance and keeps FPS high.
     ///
     /// - Parameters:
@@ -373,7 +377,8 @@ class LandscapeNode {
             tempMaskNode.addChild(currentTextureNode)
         }
         // Add new cuts that are not in texture yet
-        for node in cropMaskNode.children where node != flattenedMaskNode {
+        cropMaskNode.enumerateChildNodes(withName: "*") { node, _ in
+            if node === self.flattenedMaskNode { return }
             if let shape = node as? SKShapeNode {
                 tempMaskNode.addChild(shape.copy() as! SKShapeNode)
             }
@@ -390,8 +395,9 @@ class LandscapeNode {
         flattenedMaskNode.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         flattenedMaskNode.position = CGPoint(x: cropFrame.midX, y: cropFrame.midY)
         // Remove all new cut nodes and add texture with all as child
-        cropMaskNode.removeAllChildren()
-        cropMaskNode.addChild(flattenedMaskNode)
+        cropMaskNode.enumerateChildNodes(withName: "cutnode") { node, _ in
+            node.removeFromParent()
+        }
         // Update total cut coverage
         updateTotalCutCoverage(using: view) { coverage in }
     }
@@ -431,16 +437,20 @@ class LandscapeNode {
                 DispatchQueue.main.async { completion(0) }
                 return
             }
-            var pixel = [UInt8](repeating: 0, count: 4)
+            var pixel = [UInt16](repeating: 0, count: 4)
             self.ciContext.render(
                 outputImage,
                 toBitmap: &pixel,
-                rowBytes: 4,
+                rowBytes: MemoryLayout<UInt16>.size * 4,
                 bounds: outputImage.extent,
-                format: .RGBA8,
+                format: .RGBA16,
                 colorSpace: CGColorSpaceCreateDeviceRGB()
             )
-            let totalCutCoverage = CGFloat(pixel[0]) / 255.0
+            let totalCutCoverage = CGFloat(pixel[0]) / 65535.0
+            if totalCutCoverage > 0.999 {
+                // Close to end game so update frequently
+                self.flattenEvery = 10
+            }
             // Return the result to the main thread safely
             DispatchQueue.main.async {
                 self.totalCutCoverage = totalCutCoverage
@@ -491,5 +501,21 @@ class LandscapeNode {
     /// Toggle the visibility
     func toggleRedMaskHidden() -> Void {
         redMaskNode.isHidden = !redMaskNode.isHidden
+    }
+    
+    /// Reset node to initial state
+    func reset(in scene: SKScene) -> Void {
+        setRedMaskHidden(false)
+        totalCutCoverage = 0.0
+        cropMaskNode.enumerateChildNodes(withName: "cutnode") { node, _ in
+            node.removeFromParent()
+        }
+        flattenEvery = 150
+        flattenedMaskNode.texture = nil
+        flattenedMaskNode.size = shortGrassTileMap.mapSize
+        node.position = originalCenter
+        node.zRotation = 0
+        updatePhysicsEdges()
+        scene.view?.setNeedsDisplay()
     }
 }

@@ -27,7 +27,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var leftHandleValue: CGFloat = 0.0
     var rightHandleValue: CGFloat = 0.0
     private var mowerAudioPlayer = MowerAudioPlayer()
-    private let flattenEvery: Int = 50
     
     var totalCutCoverage: CGFloat {
         return landscapeNode.totalCutCoverage
@@ -111,7 +110,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                                        mowerNode.cutWidth,
                                        mowerNode.cutHeight)
             }
-            if landscapeNode.cutCount >= flattenEvery {
+            if landscapeNode.cutCount >= landscapeNode.flattenEvery {
                 landscapeNode.flattenMask(using: self.view!)
             }
         }
@@ -164,6 +163,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     /// Remove red mask, zoom out camera, rotate camera to align with landscape, stop audio
     func onGameEnd() {
         landscapeNode.setRedMaskHidden(true)
+        resetCamera()
+        mowerAudioPlayer.setVolume(mowerSpeed: 0.2)
+        mowerAudioPlayer.stop()
+    }
+    
+    /// Reset camera to center of landscape
+    func resetCamera() -> Void {
         cameraNode.cameraMode = .centerOnLandscape
         let targetPosition = landscapeNode.node.convert(landscapeNode.originalCenter, to: self)
         let moveAction = SKAction.move(to: targetPosition, duration: 2.0)
@@ -174,7 +180,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         zoomAction.timingMode = .easeInEaseOut
         let actionGroup = SKAction.group([moveAction, rotateAction, zoomAction])
         cameraNode.node.run(actionGroup)
-        mowerAudioPlayer.setVolume(mowerSpeed: 0.2)
-        mowerAudioPlayer.stop()
+    }
+    
+    /// Reset the scene when reset button is clicked
+    func onReset() -> Void {
+        mowerAudioPlayer.reset()
+        landscapeNode.reset(in: self)
+        mowerNode.node.position = landscapeNode.originalCenter
+        mowerNode.node.zRotation = 0.0
+        mowerNode.resetEmitter()
+        resetCamera()
+    }
+    
+    /// Access point for GameViewController to call mowerAudioPlayer
+    func playButtonClickAudio() -> Void {
+        mowerAudioPlayer.playClickAudio()
     }
 }

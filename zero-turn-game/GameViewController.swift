@@ -23,6 +23,9 @@ class GameViewController: UIViewController, JoystickDelegate {
     private var progressFill: UIView!
     private var progressLabel: UILabel!
     private var progressFillHeightConstraint: NSLayoutConstraint!
+    private var resetButton: UIButton!
+    private var playAgainButton: UIButton!
+    private var inGameEnd: Bool = false
     
     override func viewDidLoad() -> Void {
         super.viewDidLoad()
@@ -50,6 +53,8 @@ class GameViewController: UIViewController, JoystickDelegate {
             startTimer()
             addToggleMaskButton(to: self.view, above: rightJoystick)
             addProgressBar(to: self.view, above: leftJoystick)
+            addResetButton(to: self.view, above: redMaskButton)
+            addPlayAgainButton(to: self.view)
         }
     }
     
@@ -160,7 +165,7 @@ class GameViewController: UIViewController, JoystickDelegate {
                 self.elapsedTime += 0.1
                 self.timerLabel.text = String(format: "Time: %.1f s", self.elapsedTime)
                 if let coverage = self.gameScene?.totalCutCoverage {
-                    self.updateProgressBar(coverage)
+                    self.updateProgressBar(coverage, should_animate: 1.0)
                 }
             }
         }
@@ -190,6 +195,7 @@ class GameViewController: UIViewController, JoystickDelegate {
     /// Call the function in game scene to toggle mask. Switch button image based on state.
     @objc private func redMaskButtonTapped() -> Void {
         gameScene?.toggleRedMaskHidden()
+        gameScene?.playButtonClickAudio()
         redMaskIsHidden = !redMaskIsHidden
         let imageName = redMaskIsHidden ? "eye.slash" : "eye"
         redMaskButton.setImage(UIImage(systemName: imageName), for: .normal)
@@ -243,11 +249,12 @@ class GameViewController: UIViewController, JoystickDelegate {
     ///
     /// - Parameters:
     ///     - coverage: The total grass cut coverage
-    private func updateProgressBar(_ coverage: CGFloat) -> Void {
+    ///     - should_animate: 0.0 if progress bar should be reset without animation
+    private func updateProgressBar(_ coverage: CGFloat, should_animate: Double) -> Void {
         let clamped = max(0, min(1, coverage))
         let barHeight = progressContainer.bounds.height * clamped
         progressFillHeightConstraint.constant = barHeight
-        UIView.animate(withDuration: 0.15) {
+        UIView.animate(withDuration: 0.15 * should_animate) {
             self.progressContainer.layoutIfNeeded()
             // Color gradient: red to yellow to green
             self.progressFill.backgroundColor = UIColor(
@@ -265,6 +272,7 @@ class GameViewController: UIViewController, JoystickDelegate {
     
     /// Call this function when the game ends
     private func onGameEnd() -> Void {
+        inGameEnd = true
         gameScene?.onGameEnd()
         redMaskButton.isEnabled = false
         redMaskButton.isHidden = true
@@ -275,20 +283,25 @@ class GameViewController: UIViewController, JoystickDelegate {
         progressContainer.isHidden = true
         progressFill.isHidden = true
         progressLabel.isHidden = true
-        animateTimerLabelOnGameEnd()
+        transformTimerLabelOnGameEnd()
+        resetButton.isHidden = true
+        resetButton.isUserInteractionEnabled = false
+        playAgainButton.isHidden = false
     }
     
-    /// Animate the timer label on game end to move to center
-    /// of the screen and then continuously  blink in and out
-    private func animateTimerLabelOnGameEnd() -> Void {
+    /// Transform the timer label on game end to move to center
+    /// of the screen and become larger font size.
+    private func transformTimerLabelOnGameEnd() -> Void {
         guard let view = timerLabel.superview else { return }
+        timerLabel.layer.removeAllAnimations()
         view.removeConstraints(view.constraints.filter {
             $0.firstItem as? UILabel == timerLabel || $0.secondItem as? UILabel == timerLabel
         })
         NSLayoutConstraint.activate([
             timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            timerLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            timerLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60)
         ])
+        // Animate placement
         UIView.animate(withDuration: 2.0,
                        delay: 0,
                        usingSpringWithDamping: 0.8,
@@ -296,16 +309,106 @@ class GameViewController: UIViewController, JoystickDelegate {
                        options: [.curveEaseInOut],
                        animations: {
             view.layoutIfNeeded()
-            let t = CGAffineTransform(scaleX: 2.0, y: 2.0)
-            self.timerLabel.transform = t}, completion: nil)
+            self.timerLabel.transform = CGAffineTransform(scaleX: 2.0, y: 2.0)
+        })
+        // Animate blink
         UIView.animate(withDuration: 0.5,
                        delay: 0.0,
                        options: [.autoreverse, .repeat, .allowUserInteraction],
                        animations: {
-            self.timerLabel.alpha = 0.0
-        }, completion: nil)
+            self.timerLabel.alpha = 0.1
+        })
     }
-
+    
+    /// Add the play again button, and hide is by default until game ends
+    func addPlayAgainButton(to view: UIView) -> Void {
+        playAgainButton = UIButton(type: .system)
+        playAgainButton.translatesAutoresizingMaskIntoConstraints = false
+        playAgainButton.isHidden = true
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = UIColor.darkGray
+        config.baseForegroundColor = .white
+        config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 20, bottom: 14, trailing: 20)
+        let font = UIFont.systemFont(ofSize: 48, weight: .black)
+        config.attributedTitle = AttributedString("Play Again", attributes: AttributeContainer([.font: font]))
+        playAgainButton.configuration = config
+        playAgainButton.addTarget(self, action: #selector(resetButtonTapped), for: .touchUpInside)
+        view.addSubview(playAgainButton)
+        NSLayoutConstraint.activate([
+            playAgainButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            playAgainButton.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100),
+            playAgainButton.widthAnchor.constraint(equalToConstant: 300),
+            playAgainButton.heightAnchor.constraint(equalToConstant: 100)
+        ])
+    }
+    
+    /// Add button to reset mowing session
+    private func addResetButton(to view: UIView, above leftJoystick: UIButton) -> Void {
+        resetButton = UIButton(type: .system)
+        resetButton.translatesAutoresizingMaskIntoConstraints = false
+        resetButton.layer.cornerRadius = 8
+        resetButton.clipsToBounds = true
+        // Use configuration
+        var config = UIButton.Configuration.filled()
+        config.image = UIImage(systemName: "arrow.counterclockwise")
+        config.baseBackgroundColor = UIColor.black.withAlphaComponent(0.5)
+        config.baseForegroundColor = .systemBlue
+        resetButton.configuration = config
+        // Add target
+        resetButton.addTarget(self, action: #selector(resetButtonTapped), for: .touchUpInside)
+        view.addSubview(resetButton)
+        NSLayoutConstraint.activate([
+            resetButton.bottomAnchor.constraint(equalTo: redMaskButton.topAnchor, constant: -10),
+            resetButton.centerXAnchor.constraint(equalTo: redMaskButton.centerXAnchor),
+            resetButton.widthAnchor.constraint(equalTo: redMaskButton.widthAnchor),
+            resetButton.heightAnchor.constraint(equalTo: redMaskButton.heightAnchor)
+        ])
+    }
+    
+    /// Reset the mowing session and view
+    @objc private func resetButtonTapped() -> Void {
+        gameScene?.playButtonClickAudio()
+        gameScene?.onReset()
+        timerLabel.text = "Time: 0.0s"
+        elapsedTime = 0.0
+        redMaskButton.isEnabled = true
+        redMaskButton.isHidden = false
+        leftJoystick.isUserInteractionEnabled = true
+        leftJoystick.isHidden = false
+        rightJoystick.isUserInteractionEnabled = true
+        rightJoystick.isHidden = false
+        let should_animate = inGameEnd ? 0.0 : 1.0
+        updateProgressBar(0.0, should_animate: should_animate)
+        progressContainer.isHidden = false
+        progressFill.isHidden = false
+        progressLabel.isHidden = false
+        undoTimerLabelTransform()
+        resetButton.isHidden = false
+        resetButton.isUserInteractionEnabled = true
+        playAgainButton.isHidden = true
+        inGameEnd = false
+    }
+    
+    /// When Play Again button is pressed after game ends return the
+    /// timer label to the original position at the top center of screen
+    private func undoTimerLabelTransform() -> Void {
+        timerLabel.layer.removeAllAnimations()
+        timerLabel.transform = .identity
+        timerLabel.alpha = 1.0
+        if let view = timerLabel.superview {
+            view.removeConstraints(view.constraints.filter {
+                $0.firstItem as? UILabel == timerLabel || $0.secondItem as? UILabel == timerLabel
+            })
+        }
+        NSLayoutConstraint.activate([
+            timerLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+        UIView.animate(withDuration: 0.5) {
+            self.timerLabel.superview?.layoutIfNeeded()
+        }
+    }
+    
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if UIDevice.current.userInterfaceIdiom == .phone {
             return .allButUpsideDown
